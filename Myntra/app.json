@@ -21,7 +21,7 @@
     },
     "web": {
       "output": "static",
-      "favicon": "./assets/images/myntra-fav.jpg"
+      "favicon": "./assets/images/Mytra-fav.png"
     },
     "plugins": [
       "expo-router",
@@ -44,7 +44,9 @@
       "reactCompiler": true
     },
     "extra": {
-      "router": {},
+      "router": {
+        "origin": false
+      },
       "eas": {
         "projectId": "202d869f-6c64-4c8a-b326-2b719a009e79"
       }

@@ -45,3 +45,7 @@ export default function RootLayout() {
     </ThemeProvider>
   );
 }
+// app/_layout.tsx
+export const unstable_settings = {
+  staticRendering: false,
+};
