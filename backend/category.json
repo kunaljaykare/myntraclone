@@ -1,0 +1,59 @@
+[
+  {
+    "name": "Men",
+    "subcategory": [
+      "T-Shirts",
+      "Shirts",
+      "Jeans",
+      "Trousers",
+      "Suits",
+      "Activewear"
+    ],
+    "image": "https://images.unsplash.com/photo-1617137968427-85924c800a22?w=500&auto=format&fit=crop",
+    "productId": {
+      "$oid": "698c812f4553dbd68a37b85d"
+    }
+  },
+  {
+    "name": "Women",
+    "subcategory": [
+      "Dresses",
+      "Tops",
+      "Ethnic Wear",
+      "Western Wear",
+      "Activewear"
+    ],
+    "image": "data:image/webp;base64,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",
+    "productId": {
+      "$oid": "698c817a4553dbd68a37b85f"
+    }
+  },
+  {
+    "name": "Kids",
+    "subcategory": [
+      "Boys Clothing",
+      "Girls Clothing",
+      "Infants",
+      "Toys",
+      "School Essentials"
+    ],
+    "image": "https://images.unsplash.com/photo-1622290291468-a28f7a7dc6a8?w=500&auto=format&fit=crop",
+    "productId": {
+      "$oid": "698c82074553dbd68a37b860"
+    }
+  },
+  {
+    "name": "Beauty",
+    "subcategory": [
+      "Makeup",
+      "Skincare",
+      "Haircare",
+      "Fragrances",
+      "Personal Care"
+    ],
+    "image": "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=500&auto=format&fit=crop",
+    "productId": {
+      "$oid": "698c823c4553dbd68a37b861"
+    }
+  }
+]
