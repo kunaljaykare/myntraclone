@@ -53,7 +53,7 @@ export default function Bag() {
       try {
         setIsLoading(true);
         const bag = await axios.get(
-          `https://10.85.148.226:5000/bag/${user._id}`
+          `https://myntraclone-7ekz.onrender.com//bag/${user._id}`
         );
         setbag(bag.data);
       } catch (error) {
@@ -96,7 +96,7 @@ export default function Bag() {
   );
   const handledelete=async(itemid:any)=>{
     try {
-      await axios.delete(`https://10.85.148.226:5000/bag/${itemid}`)
+      await axios.delete(`https://myntraclone-7ekz.onrender.com//bag/${itemid}`)
       fetchproduct();
     } catch (error) {
       console.log(error)

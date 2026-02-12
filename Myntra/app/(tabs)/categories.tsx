@@ -28,7 +28,7 @@ export default function TabTwoScreen() {
     const fetchproduct = async () => {
       try {
         setIsLoading(true);
-        const cat = await axios.get("https://10.85.148.226:5000/category");
+        const cat = await axios.get("https://myntraclone-7ekz.onrender.com//category");
         setcategories(cat.data);
       } catch (error) {
         console.log(error);

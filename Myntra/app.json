@@ -21,7 +21,7 @@
     },
     "web": {
       "output": "static",
-      "favicon": "./assets/images/myntra-fav.webp"
+      "favicon": "./assets/images/myntra-fav.jpg"
     },
     "plugins": [
       "expo-router",

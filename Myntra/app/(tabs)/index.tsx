@@ -45,8 +45,8 @@ export default function Home() {
     const fetchproduct = async () => {
       try {
         setIsLoading(true);
-        const cat = await axios.get("https://10.85.148.226:5000/category");
-        const product = await axios.get("https://10.85.148.226:5000/product");
+        const cat = await axios.get("https://myntraclone-7ekz.onrender.com//category");
+        const product = await axios.get("https://myntraclone-7ekz.onrender.com//product");
         setcategories(cat.data);
         setproduct(product.data);
       } catch (error) {
