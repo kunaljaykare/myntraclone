@@ -15,13 +15,9 @@ router.get("/", async (req, res) => {
 router.get("/:id", async (req, res) => {
   const productid = req.params.id;
   try {
-    const product = await Product.findById  (productid);
-    if (!product) {
-      return res.status(404).json({ message: "Product not found" });
-    }
-    res.status(200).json(product);  
-  }
-   catch (error) {
+    const product = await Product.findById(productid);
+    res.status(200).json(product);
+  } catch (error) {
     console.log(error);
     return res.status(500).json({ message: "Something went wrong" });
   }

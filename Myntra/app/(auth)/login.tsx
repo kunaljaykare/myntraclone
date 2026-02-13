@@ -1,50 +1,92 @@
+import { useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Image,
+  ActivityIndicator,
+} from "react-native";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
-import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
-declare global {
-  var IsAuthenticated: boolean | undefined;
-}
+import React from "react";
+import { Eye, EyeOff } from "lucide-react-native";
+import { useAuth } from "@/context/AuthContext";
+
 export default function Login() {
+  const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const router = useRouter();
-
-  const handleLogin = () => {
-    global.IsAuthenticated = true;
-    router.replace("/(tabs)");
+  const [showPassword, setShowPassword] = useState(false);
+  const [isloading, setisloading] = useState(false);
+  const handleLogin = async () => {
+    try {
+      setisloading(true);
+      await login(email, password);
+      router.replace("/(tabs)");
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setisloading(false);
+    }
   };
 
   return (
     <View style={styles.container}>
       <Image
-        style={styles.backgroundImage}
         source={{
           uri: "https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=2070&auto=format&fit=crop",
         }}
+        style={styles.backgroundImage}
       />
-
       <View style={styles.formContainer}>
         <Text style={styles.title}>Welcome to Myntra</Text>
         <Text style={styles.subtitle}>Login to continue shopping</Text>
-
         <TextInput
           style={styles.input}
           placeholder="Email"
           value={email}
           onChangeText={setEmail}
           autoCapitalize="none"
+          keyboardType="email-address"
         />
+        <View style={styles.passwordContainer}>
+          <TextInput
+            style={styles.passwordInput}
+            placeholder="Password"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry={!showPassword}
+          />
+          <TouchableOpacity
+            style={styles.eyeIcon}
+            onPress={() => setShowPassword(!showPassword)}
+          >
+            {showPassword ? (
+              <EyeOff size={20} color="#666" />
+            ) : (
+              <Eye size={20} color="#666" />
+            )}
+          </TouchableOpacity>
+        </View>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={handleLogin}
+          disabled={isloading}
+        >
+          {isloading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.buttonText}>LOGIN</Text>
+          )}
+        </TouchableOpacity>
 
-        <TextInput
-          style={styles.input}
-          placeholder="Password"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-        />
-
-        <TouchableOpacity style={styles.button} onPress={handleLogin}>
-          <Text style={styles.buttonText}>Login</Text>
+        <TouchableOpacity
+          style={styles.signupLink}
+          onPress={() => router.push("/signup")}
+        >
+          <Text style={styles.signupText}>Don't have an account? Sign Up</Text>
         </TouchableOpacity>
       </View>
     </View>

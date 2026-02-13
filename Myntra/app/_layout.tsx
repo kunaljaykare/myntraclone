@@ -16,6 +16,10 @@ import { AuthProvider } from "@/context/AuthContext";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
+declare global {
+  var isAuthenticated: boolean;
+}
+global.isAuthenticated = false;
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   const [loaded] = useFonts({
