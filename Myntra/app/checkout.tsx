@@ -22,7 +22,7 @@ export default function Checkout() {
       return;
     }
     try {
-      await axios.post(`https://myntraclone-7ekz.onrender.com//order/create/${user._id}`, {
+      await axios.post(`//order/create/${user._id}`, {
         shippingAddress: "123 Main Street, Apt 4B, New York, NY, 10001",
         paymentMethod: "Card",
       });

@@ -140,7 +140,7 @@ export default function Orders() {
         try {
           setIsLoading(true);
           const product = await axios.get(
-            `https://myntraclone-7ekz.onrender.com//order/user/${user._id}`
+            `https://myntraclone-7ekz.onrender.com/order/user/${user._id}`
           );
           setorder(product.data);
         } catch (error) {
