@@ -67,18 +67,21 @@ export default function ProductDetails() {
         clearInterval(autoScrollTimer.current);
       }
     };
-  }, []);
+  }, [product]);
 
   const startAutoScroll = () => {
+    if (!product?.images?.length) return;
+
     autoScrollTimer.current = setInterval(() => {
       setCurrentImageIndex((prevIndex) => {
         const nextIndex = (prevIndex + 1) % product.images.length;
-        if (scrollViewRef.current) {
-          scrollViewRef.current.scrollTo({ x: nextIndex * width, animated: true });
-        }
+        scrollViewRef.current?.scrollTo({
+          x: nextIndex * width,
+          animated: true,
+        });
         return nextIndex;
       });
-    }, 3000); // Change image every 3 seconds
+    }, 3000);
   };
 
   if (!product) {
@@ -100,7 +103,7 @@ export default function ProductDetails() {
         productId: id,
       });
       setiswishlist(true);
-      router.push("./(tabs)/wishlist.tsx");
+      router.push("/wishlist");
     } catch (error) {
       console.log(error);
     }
