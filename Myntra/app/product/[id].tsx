@@ -2,10 +2,12 @@ import { useAuth } from "@/context/AuthContext";
 import axios from "axios";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Heart, ShoppingBag } from "lucide-react-native";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import { addRecentlyViewed } from "@/utils/recentlyViewed";
+
 import {
   ActivityIndicator,
+  Alert,
   Image,
   ScrollView,
   StyleSheet,
@@ -110,31 +112,40 @@ export default function ProductDetails() {
   };
   const handleAddToBag = async () => {
     if (!user) {
-      router.push("/login");
-      return;
-    }
+    router.push("/login");
+    return;
+  }
+  if (!selectedSize) {
+    Alert.alert("Select Size", "Please select a size before adding to bag");
+    return;
+  }
+  try {
+    await axios.post("https://myntraclone-7ekz.onrender.com/bag", {
+      userId: user._id,
+      productId: id,
+      size: selectedSize,
+      quantity: 1,
+    });
 
-    if (!selectedSize) {
-      // In a real app, show a proper error message
-      alert("Please select a size");
-      return;
-    }
-    try {
-      setLoading(true);
-      await axios.post(`https://myntraclone-7ekz.onrender.com/bag`, {
-        userId: user._id,
-        productId: id,
-        size: selectedSize,
-        quantity: 1,
-      });
-      router.push("./(tabs)/bag");
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setLoading(false);
-    }
-    // In a real app, this would add the item to the cart in your state management solution
-  };
+    Alert.alert(
+      "Added to Bag 🛍️",
+      "Item has been added successfully",
+      [
+        {
+          text: "Go to Bag",
+          onPress: () => router.replace("/bag"),
+        },
+        {
+          text: "Continue Shopping",
+          style: "cancel",
+        },
+      ]
+    );
+  } catch (error) {
+    console.log(error);
+    Alert.alert("Error", "Something went wrong. Please try again.");
+  }
+};
 
   const handleScroll = (event: any) => {
     const contentOffset = event.nativeEvent.contentOffset;

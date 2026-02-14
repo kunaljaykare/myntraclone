@@ -2,7 +2,8 @@ import { useAuth } from "@/context/AuthContext";
 import axios from "axios";
 import { useRouter } from "expo-router";
 import { Minus, Plus, ShoppingBag, Trash2 } from "lucide-react-native";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 import {
   ActivityIndicator,
   Image,
@@ -44,28 +45,29 @@ export default function Bag() {
   const [cartItems, setCartItems] = useState<any[]>([]);
   const [savedItems, setSavedItems] = useState<any[]>([]);
 
+  const fetchBag = async () => {
+    if (!user) return;
 
-useEffect(() => {
-  fetchBag();
-}, [user]);
+    try {
+      setIsLoading(true);
+      const res = await axios.get(
+        `https://myntraclone-7ekz.onrender.com/bag/${user._id}`
+      );
 
- const fetchBag = async () => {
-  if (!user) return;
+      setCartItems(res.data.active || []);
+      setSavedItems(res.data.saved || []);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  useFocusEffect(
+    useCallback(() => {
+      fetchBag();
+    }, [user]));
 
-  try {
-    setIsLoading(true);
-    const res = await axios.get(
-      `https://myntraclone-7ekz.onrender.com/bag/${user._id}`
-    );
 
-    setCartItems(res.data.active);
-    setSavedItems(res.data.saved);
-  } catch (error) {
-    console.log(error);
-  } finally {
-    setIsLoading(false);
-  }
-};
 
 
   if (!user) {
@@ -98,28 +100,28 @@ useEffect(() => {
     (sum, item) => sum + item.productId.price * item.quantity,
     0
   );
-  
-  
+
+
   const handleSaveForLater = async (bagId: string) => {
-  await axios.patch(
-    `https://myntraclone-7ekz.onrender.com/bag/save-for-later/${bagId}`
-  );
-  fetchBag();
-};
-const handleMoveToCart = async (bagId: string) => {
-  await axios.patch(
-    `https://myntraclone-7ekz.onrender.com/bag/move-to-cart/${bagId}`
-  );
-  fetchBag();
-};
-const handledelete=async(itemid:any)=>{
+    await axios.patch(
+      `https://myntraclone-7ekz.onrender.com/bag/save-for-later/${bagId}`
+    );
+    fetchBag();
+  };
+  const handleMoveToCart = async (bagId: string) => {
+    await axios.patch(
+      `https://myntraclone-7ekz.onrender.com/bag/move-to-cart/${bagId}`
+    );
+    fetchBag();
+  };
+  const handledelete = async (itemid: any) => {
     try {
       await axios.delete(`https://myntraclone-7ekz.onrender.com/bag/${itemid}`)
       fetchBag();
     } catch (error) {
       console.log(error)
     }
-   
+
   };
   return (
     <View style={styles.container}>
@@ -128,82 +130,82 @@ const handledelete=async(itemid:any)=>{
       </View>
 
       <ScrollView style={styles.content}>
-  {/* ACTIVE CART ITEMS */}
-  {cartItems.map((item) => (
-    <View key={item._id} style={styles.bagItem}>
-      <Image
-        source={{ uri: item.productId.images[0] }}
-        style={styles.itemImage}
-      />
-      <View style={styles.itemInfo}>
-        <Text style={styles.brandName}>{item.productId.brand}</Text>
-        <Text style={styles.itemName}>{item.productId.name}</Text>
-        <Text style={styles.itemSize}>Size: {item.size}</Text>
-        <Text style={styles.itemPrice}>₹{item.productId.price}</Text>
+        {/* ACTIVE CART ITEMS */}
+        {cartItems.map((item) => (
+          <View key={item._id} style={styles.bagItem}>
+            <Image
+              source={{ uri: item.productId.images[0] }}
+              style={styles.itemImage}
+            />
+            <View style={styles.itemInfo}>
+              <Text style={styles.brandName}>{item.productId.brand}</Text>
+              <Text style={styles.itemName}>{item.productId.name}</Text>
+              <Text style={styles.itemSize}>Size: {item.size}</Text>
+              <Text style={styles.itemPrice}>₹{item.productId.price}</Text>
 
-        <View style={styles.quantityContainer}>
-          <TouchableOpacity style={styles.quantityButton}>
-            <Minus size={20} color="#3e3e3e" />
-          </TouchableOpacity>
+              <View style={styles.quantityContainer}>
+                <TouchableOpacity style={styles.quantityButton}>
+                  <Minus size={20} color="#3e3e3e" />
+                </TouchableOpacity>
 
-          <Text style={styles.quantity}>{item.quantity}</Text>
+                <Text style={styles.quantity}>{item.quantity}</Text>
 
-          <TouchableOpacity style={styles.quantityButton}>
-            <Plus size={20} color="#3e3e3e" />
-          </TouchableOpacity>
+                <TouchableOpacity style={styles.quantityButton}>
+                  <Plus size={20} color="#3e3e3e" />
+                </TouchableOpacity>
 
-          <TouchableOpacity
-            style={styles.removeButton}
-            onPress={() => handledelete(item._id)}
-          >
-            <Trash2 size={20} color="#ff3f6c" />
-          </TouchableOpacity>
-        </View>
+                <TouchableOpacity
+                  style={styles.removeButton}
+                  onPress={() => handledelete(item._id)}
+                >
+                  <Trash2 size={20} color="#ff3f6c" />
+                </TouchableOpacity>
+              </View>
 
-        <TouchableOpacity
-          onPress={() => handleSaveForLater(item._id)}
-        >
-          <Text style={{ color: "#ff3f6c", marginTop: 8 }}>
-            Save for Later
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  ))}
-
-  {/* SAVED FOR LATER */}
-  {savedItems.length > 0 && (
-    <>
-      <Text style={styles.headerTitle}>Saved for Later</Text>
-
-      {savedItems.map((item) => (
-        <View key={item._id} style={styles.bagItem}>
-          <Image
-            source={{ uri: item.productId.images[0] }}
-            style={styles.itemImage}
-          />
-          <View style={styles.itemInfo}>
-            <Text style={styles.brandName}>
-              {item.productId.brand}
-            </Text>
-            <Text style={styles.itemName}>
-              {item.productId.name}
-            </Text>
-
-            <TouchableOpacity
-              disabled={isLoading}
-              onPress={() => handleMoveToCart(item._id)}
-            >
-              <Text style={{ color: "#ff3f6c", marginTop: 8 }}>
-                Move to Bag
-              </Text>
-            </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => handleSaveForLater(item._id)}
+              >
+                <Text style={{ color: "#ff3f6c", marginTop: 8 }}>
+                  Save for Later
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
-      ))}
-    </>
-  )}
-</ScrollView>
+        ))}
+
+        {/* SAVED FOR LATER */}
+        {savedItems.length > 0 && (
+          <>
+            <Text style={styles.headerTitle}>Saved for Later</Text>
+
+            {savedItems.map((item) => (
+              <View key={item._id} style={styles.bagItem}>
+                <Image
+                  source={{ uri: item.productId.images[0] }}
+                  style={styles.itemImage}
+                />
+                <View style={styles.itemInfo}>
+                  <Text style={styles.brandName}>
+                    {item.productId.brand}
+                  </Text>
+                  <Text style={styles.itemName}>
+                    {item.productId.name}
+                  </Text>
+
+                  <TouchableOpacity
+                    disabled={isLoading}
+                    onPress={() => handleMoveToCart(item._id)}
+                  >
+                    <Text style={{ color: "#ff3f6c", marginTop: 8 }}>
+                      Move to Bag
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            ))}
+          </>
+        )}
+      </ScrollView>
 
 
       <View style={styles.footer}>
