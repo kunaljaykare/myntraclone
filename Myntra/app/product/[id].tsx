@@ -3,6 +3,7 @@ import axios from "axios";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Heart, ShoppingBag } from "lucide-react-native";
 import React, { useEffect, useRef, useState } from "react";
+import { addRecentlyViewed } from "@/utils/recentlyViewed";
 import {
   ActivityIndicator,
   Image,
@@ -46,6 +47,16 @@ export default function ProductDetails() {
     };
     fetchproduct();
   }, []);
+  useEffect(() => {
+    if (product) {
+      addRecentlyViewed({
+        _id: product._id,
+        title: product.name,
+        image: product.images[0],
+        price: product.price,
+      });
+    }
+  }, [product]);
 
   useEffect(() => {
     // Start auto-scroll

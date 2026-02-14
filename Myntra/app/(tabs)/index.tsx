@@ -3,6 +3,7 @@ import axios from "axios";
 import { useRouter } from "expo-router";
 import { ChevronRight, Search } from "lucide-react-native";
 import React, { useEffect, useState } from "react";
+import RecentlyViewedCarousel from "@/components/RecentlyViewedCarousel";
 import {
   ActivityIndicator,
   Image,
@@ -128,6 +129,10 @@ export default function Home() {
           ))}
         </ScrollView>
       </View>
+      <View style={styles.section}>
+        <RecentlyViewedCarousel />
+      </View>
+
 
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
@@ -142,7 +147,7 @@ export default function Home() {
             />
           ) : !product || product.length === 0 ? (
             <Text style={styles.emptyText}>No Product available</Text>
-          ) : ( 
+          ) : (
             <View style={styles.productsGrid}>
               {product.map((product: any) => (
                 <TouchableOpacity
@@ -151,9 +156,11 @@ export default function Home() {
                   onPress={() => handleProductPress(product._id)}
                 >
                   <Image
-                    source={{ uri: product.images[0
-                      
-                    ] }}
+                    source={{
+                      uri: product.images[0
+
+                      ]
+                    }}
                     style={styles.productImage}
                   />
                   <View style={styles.productInfo}>
