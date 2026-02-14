@@ -34,4 +34,40 @@ router.delete("/:itemid", async (req, res) => {
     return res.status(500).json({ message: "Error removing item from bag" });
   }
 });
+
+router.patch("/save-for-later/:id", async (req, res) => {
+  try {
+    const item = await Bag.findByIdAndUpdate(
+      req.params.id,
+      { status: "SAVED" },
+      { new: true }
+    );
+    res.json(item);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Error saving item for later" });
+  }
+});
+
+router.patch("/move-to-cart/:id", async (req, res) => {
+  try {
+    const item = await Bag.findByIdAndUpdate(
+      req.params.id,
+      { status: "ACTIVE" },
+      { new: true }
+    );
+    res.json(item);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Error moving item to cart" });
+  }
+});
+
+router.patch("/:userId", async (req, res) => {
+  const items = await Bag.find({ userId: req.params.userId })
+    .populate("productId");
+  const active = items.filter(i => i.status === "ACTIVE");
+  const saved = items.filter(i => i.status === "SAVED");
+  res.json({ active, saved });
+});
 module.exports = router;

@@ -2,10 +2,15 @@ const mongoose = require("mongoose");
 
 const BagItemSchema = new mongoose.Schema(
   {
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-    productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product" },
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product", required: true },
     size: String,
-    quantity: Number,
+    quantity: { type: Number, default: 1 },
+    status: {
+      type: String,
+      enum: ["active", "saved"],
+      default: "active"
+    },
   },
   { timestamps: true }
 );
