@@ -4,12 +4,12 @@ const router = express.Router();
 
 router.post("/", async (req, res) => {
   try {
-    const Bags = new Bag(req.body);
-    const saveitem = await Bags.save();
+    const BagItem = new Bag(req.body);
+    const saveitem = await BagItem.save();
     res.status(200).json(saveitem);
   } catch (error) {
     console.log(error);
-    return res.status(500).json({ message: "Something went wrong" });
+    res.status(500).json({ message: "Something went wrong" });
   }
 });
 
@@ -34,7 +34,7 @@ router.delete("/:itemid", async (req, res) => {
     return res.status(500).json({ message: "Error removing item from bag" });
   }
 });
-
+/*
 router.patch("/save-for-later/:id", async (req, res) => {
   try {
     const item = await Bag.findByIdAndUpdate(
@@ -69,5 +69,29 @@ router.patch("/:userId", async (req, res) => {
   const active = items.filter(i => i.status === "ACTIVE");
   const saved = items.filter(i => i.status === "SAVED");
   res.json({ active, saved });
+});*/
+router.put("/:itemid", async (req, res) => {
+  try {
+    const update = {};
+
+    if (req.body.quantity !== undefined) {
+      update.quantity = req.body.quantity;
+    }
+
+    if (req.body.status !== undefined) {
+      update.status = req.body.status; // "ACTIVE" or "SAVED"
+    }
+
+    const item = await Bag.findByIdAndUpdate(
+      req.params.itemid,
+      update,
+      { new: true }
+    );
+
+    res.status(200).json(item);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Error updating bag item" });
+  }
 });
 module.exports = router;

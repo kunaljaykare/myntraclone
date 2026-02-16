@@ -68,10 +68,27 @@ export default function Bag() {
       </View>
     );
   }
-  const total = bag?.reduce(
+  
+  const activeItems = bag.filter(item => !item.savedForLater);
+  const savedItems = bag.filter(item => item.savedForLater);
+  const total = activeItems.reduce(
     (sum: any, item: any) => sum + item.productId.price * item.quantity,
     0
   );
+
+  const toggleSaveForLater = async (itemId: string, save: boolean) => {
+    try {
+      await axios.put(
+        `https://myntraclone-7ekz.onrender.com/bag/${itemId}`,
+        { savedForLater: save }
+      );
+      fetchproduct();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+
   const handledelete = async (itemid: any) => {
     try {
       await axios.delete(`https://myntraclone-7ekz.onrender.com/bag/${itemid}`)
@@ -103,7 +120,7 @@ export default function Bag() {
       </View>
 
       <ScrollView style={styles.content}>
-        {bag?.map((item: any) => (
+        {activeItems.map((item: any) => (
           <View key={item._id} style={styles.bagItem}>
             <Image
               source={{ uri: item.productId.images[0] }}
@@ -132,23 +149,64 @@ export default function Bag() {
                   <Plus size={20} color="#3e3e3e" />
                 </TouchableOpacity>
 
-                <TouchableOpacity
-                  style={styles.removeButton}
-                  onPress={() => handledelete(item._id)}
-                >
-                  <Trash2 size={20} color="#ff3f6c" />
-                </TouchableOpacity>
+
               </View>
+              <TouchableOpacity
+                onPress={() => toggleSaveForLater(item._id, true)}
+              >
+                <Text style={{ color: "#ff3f6c", marginTop: 10 }}>
+                  Save for later
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.removeButton}
+                onPress={() => handledelete(item._id)}
+              >
+                <Trash2 size={20} color="#ff3f6c" />
+              </TouchableOpacity>
 
             </View>
           </View>
         ))}
-        {bag.length === 0 && (
+        {activeItems.length === 0 && savedItems.length === 0 && (
           <View style={styles.emptyState}>
             <ShoppingBag size={64} color="#ccc" />
             <Text style={styles.emptyTitle}>Your bag is empty</Text>
           </View>
         )}
+
+        {savedItems.length > 0 && (
+          <View style={{ marginTop: 30 }}>
+            <Text style={{ fontSize: 18, fontWeight: "bold" }}>
+              Saved for Later
+            </Text>
+
+            {savedItems.map((item: any) => (
+              <View key={item._id} style={styles.bagItem}>
+                <Image
+                  source={{ uri: item.productId.images[0] }}
+                  style={styles.itemImage}
+                />
+
+                <View style={styles.itemInfo}>
+                  <Text style={styles.brandName}>{item.productId.brand}</Text>
+                  <Text style={styles.itemName}>{item.productId.name}</Text>
+                  <Text style={styles.itemPrice}>
+                    ₹{item.productId.price}
+                  </Text>
+                  <TouchableOpacity
+                    onPress={() => toggleSaveForLater(item._id, false)}
+                  >
+                    <Text style={{ color: "#ff3f6c", marginTop: 10 }}>
+                      Move to Bag
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            ))}
+          </View>
+        )}
+
 
       </ScrollView>
 
@@ -158,11 +216,16 @@ export default function Bag() {
           <Text style={styles.totalAmount}>₹{total}</Text>
         </View>
         <TouchableOpacity
-          style={styles.checkoutButton}
+          disabled={activeItems.length === 0}
+          style={[
+            styles.checkoutButton,
+            activeItems.length === 0 && { opacity: 0.5 },
+          ]}
           onPress={() => router.push("/checkout")}
         >
           <Text style={styles.checkoutButtonText}>PLACE ORDER</Text>
         </TouchableOpacity>
+
       </View>
     </View>
   );
