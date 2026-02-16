@@ -15,7 +15,6 @@ import axios from "axios";
 
 export default function Bag() {
   const router = useRouter();
-
   const [isLoading, setIsLoading] = useState(false);
   const { user } = useAuth();
   const [bag, setbag] = useState<any[]>([]);
@@ -23,10 +22,10 @@ export default function Bag() {
     // Simulate loading time
     if (user) {
 
-      fetchproduct();
+      fetchBag();
     }
   }, [user]);
-  const fetchproduct = async () => {
+  const fetchBag = async () => {
     if (user) {
       try {
         setIsLoading(true);
@@ -68,7 +67,7 @@ export default function Bag() {
       </View>
     );
   }
-  
+
   const activeItems = bag.filter(item => !item.savedForLater);
   const savedItems = bag.filter(item => item.savedForLater);
   const total = activeItems.reduce(
@@ -76,39 +75,79 @@ export default function Bag() {
     0
   );
 
-  const toggleSaveForLater = async (itemId: string, save: boolean) => {
+  const saveForLater = async (itemId: string) => {
+    setbag(prev =>
+      prev.map(item =>
+        item._id === itemId
+          ? { ...item, savedForLater: true }
+          : item
+      )
+    );
+
     try {
       await axios.put(
-        `https://myntraclone-7ekz.onrender.com/bag/${itemId}`,
-        { savedForLater: save }
+        `https://myntraclone-7ekz.onrender.com/bag/${itemId}/save`,
       );
-      fetchproduct();
+
     } catch (error) {
       console.log(error);
+      fetchBag();
+    }
+  };
+  const moveToBag = async (itemId: string) => {
+    setbag(prev =>
+      prev.map(item =>
+        item._id === itemId
+          ? { ...item, savedForLater: false, quantity: 1 }
+          : item
+      )
+    );
+
+    try {
+      await axios.put(
+        `https://myntraclone-7ekz.onrender.com/bag/${itemId}/move-to-bag`
+      );
+
+    } catch (err) {
+      console.log(err);
+      fetchBag();
     }
   };
 
 
-  const handledelete = async (itemid: any) => {
+  const handledelete = async (itemid: string) => {
+    const prevBag = bag;
+    setbag(prev => prev.filter(item => item._id !== itemid));
+
     try {
-      await axios.delete(`https://myntraclone-7ekz.onrender.com/bag/${itemid}`)
-      fetchproduct();
+      await axios.delete(`https://myntraclone-7ekz.onrender.com/bag/${itemid}`);
+
     } catch (error) {
-      console.log(error)
+      console.log(error);
+      setbag(prevBag);
     }
 
-  }
+  };
   const updateQuantity = async (itemId: string, newQty: number) => {
     if (newQty < 1) return;
 
+    setbag(prev =>
+      prev.map(item =>
+        item._id === itemId
+          ? { ...item, quantity: newQty }
+          : item
+      )
+    );
+
     try {
       await axios.put(
-        `https://myntraclone-7ekz.onrender.com/bag/${itemId}`,
+        `https://myntraclone-7ekz.onrender.com/bag/${itemId}/quantity`,
         { quantity: newQty }
       );
-      fetchproduct(); // refresh bag
+
     } catch (error) {
       console.log(error);
+      fetchBag();
     }
   };
 
@@ -152,9 +191,9 @@ export default function Bag() {
 
               </View>
               <TouchableOpacity
-                onPress={() => toggleSaveForLater(item._id, true)}
+                onPress={() => saveForLater(item._id)}
               >
-                <Text style={{ color: "#ff3f6c", marginTop: 10 }}>
+                <Text style={{ color: "#ff3f6c" }}>
                   Save for later
                 </Text>
               </TouchableOpacity>
@@ -168,12 +207,12 @@ export default function Bag() {
             </View>
           </View>
         ))}
-        {activeItems.length === 0 && savedItems.length === 0 && (
-          <View style={styles.emptyState}>
-            <ShoppingBag size={64} color="#ccc" />
-            <Text style={styles.emptyTitle}>Your bag is empty</Text>
-          </View>
+        {activeItems.length === 0 && savedItems.length > 0 && (
+          <Text style={{ textAlign: "center", marginVertical: 20 }}>
+            Your bag is empty. Move items from Saved for Later.
+          </Text>
         )}
+
 
         {savedItems.length > 0 && (
           <View style={{ marginTop: 30 }}>
@@ -195,9 +234,9 @@ export default function Bag() {
                     ₹{item.productId.price}
                   </Text>
                   <TouchableOpacity
-                    onPress={() => toggleSaveForLater(item._id, false)}
+                    onPress={() => moveToBag(item._id)}
                   >
-                    <Text style={{ color: "#ff3f6c", marginTop: 10 }}>
+                    <Text style={{ color: "#ff3f6c" }}>
                       Move to Bag
                     </Text>
                   </TouchableOpacity>
