@@ -18,6 +18,8 @@ export default function Bag() {
   const [isLoading, setIsLoading] = useState(false);
   const { user } = useAuth();
   const [bag, setbag] = useState<any[]>([]);
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
+
   useEffect(() => {
     // Simulate loading time
     if (user) {
@@ -76,6 +78,7 @@ export default function Bag() {
   );
 
   const saveForLater = async (itemId: string) => {
+    setUpdatingId(itemId);
     setbag(prev =>
       prev.map(item =>
         item._id === itemId
@@ -92,9 +95,12 @@ export default function Bag() {
     } catch (error) {
       console.log(error);
       fetchBag();
+    } finally {
+      setUpdatingId(null);
     }
   };
   const moveToBag = async (itemId: string) => {
+    setUpdatingId(itemId);
     setbag(prev =>
       prev.map(item =>
         item._id === itemId
@@ -111,25 +117,32 @@ export default function Bag() {
     } catch (err) {
       console.log(err);
       fetchBag();
+    } finally {
+      setUpdatingId(null);
     }
   };
 
 
   const handledelete = async (itemid: string) => {
     const prevBag = bag;
+    setUpdatingId(itemid);
     setbag(prev => prev.filter(item => item._id !== itemid));
 
     try {
-      await axios.delete(`https://myntraclone-7ekz.onrender.com/bag/${itemid}`);
+      await axios.delete(`https://myntraclone-7ekz.onrender.com/bag/${itemid}`
 
+      );
     } catch (error) {
       console.log(error);
       setbag(prevBag);
+    }finally {
+      setUpdatingId(null);
     }
 
   };
   const updateQuantity = async (itemId: string, newQty: number) => {
     if (newQty < 1) return;
+    setUpdatingId(itemId);
 
     setbag(prev =>
       prev.map(item =>
@@ -148,6 +161,8 @@ export default function Bag() {
     } catch (error) {
       console.log(error);
       fetchBag();
+    } finally {
+      setUpdatingId(null);
     }
   };
 
@@ -173,30 +188,43 @@ export default function Bag() {
 
               <View style={styles.quantityContainer}>
                 <TouchableOpacity
-                  style={styles.quantityButton}
+                  disabled={item.quantity === 1 || updatingId === item._id}
+                  style={[
+                    styles.quantityButton,
+                    item.quantity === 1 && { opacity: 0.5 }
+                  ]}
                   onPress={() => updateQuantity(item._id, item.quantity - 1)}
                 >
+
                   <Minus size={20} color="#3e3e3e" />
                 </TouchableOpacity>
 
                 <Text style={styles.quantity}>{item.quantity}</Text>
 
                 <TouchableOpacity
-                  style={styles.quantityButton}
+                  disabled={updatingId === item._id}
                   onPress={() => updateQuantity(item._id, item.quantity + 1)}
                 >
+
                   <Plus size={20} color="#3e3e3e" />
                 </TouchableOpacity>
 
 
               </View>
               <TouchableOpacity
+                disabled={updatingId === item._id}
                 onPress={() => saveForLater(item._id)}
               >
-                <Text style={{ color: "#ff3f6c" }}>
-                  Save for later
+                <Text
+                  style={{
+                    color: updatingId === item._id ? "#ccc" : "#ff3f6c",
+                  }}
+                >
+                  {updatingId === item._id ? "Please wait..." : "Save for later"}
                 </Text>
               </TouchableOpacity>
+
+
               <TouchableOpacity
                 style={styles.removeButton}
                 onPress={() => handledelete(item._id)}
@@ -219,7 +247,6 @@ export default function Bag() {
             <Text style={{ fontSize: 18, fontWeight: "bold" }}>
               Saved for Later
             </Text>
-
             {savedItems.map((item: any) => (
               <View key={item._id} style={styles.bagItem}>
                 <Image
@@ -234,12 +261,15 @@ export default function Bag() {
                     ₹{item.productId.price}
                   </Text>
                   <TouchableOpacity
+                    disabled={updatingId === item._id}
                     onPress={() => moveToBag(item._id)}
                   >
-                    <Text style={{ color: "#ff3f6c" }}>
-                      Move to Bag
+                    <Text style={{ color: updatingId === item._id ? "#ccc" : "#ff3f6c" }}>
+                      {updatingId === item._id ? "Please wait..." : "Move to Bag"}
                     </Text>
+
                   </TouchableOpacity>
+
                 </View>
               </View>
             ))}
