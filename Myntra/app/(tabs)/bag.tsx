@@ -1,75 +1,47 @@
+import {
+  View,
+  Text,
+  ScrollView,
+  Image,
+  TouchableOpacity,
+  StyleSheet,
+  ActivityIndicator,
+} from "react-native";
+import { useRouter } from "expo-router";
+import { ShoppingBag, Minus, Plus, Trash2 } from "lucide-react-native";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import axios from "axios";
-import { useRouter } from "expo-router";
-import { Minus, Plus, ShoppingBag, Trash2 } from "lucide-react-native";
-import React, { useCallback, useEffect, useState } from "react";
-import { useFocusEffect } from "@react-navigation/native";
-import {
-  ActivityIndicator,
-  Image,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
-
-const bagItems = [
-  {
-    id: 1,
-    name: "White Cotton T-Shirt",
-    brand: "H&M",
-    size: "L",
-    price: 799,
-    quantity: 1,
-    image:
-      "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&auto=format&fit=crop",
-  },
-  {
-    id: 2,
-    name: "Blue Denim Jacket",
-    brand: "Levis",
-    size: "M",
-    price: 2999,
-    quantity: 1,
-    image:
-      "https://images.unsplash.com/photo-1523205771623-e0faa4d2813d?w=500&auto=format&fit=crop",
-  },
-];
 
 export default function Bag() {
   const router = useRouter();
 
   const [isLoading, setIsLoading] = useState(false);
   const { user } = useAuth();
-  const [cartItems, setCartItems] = useState<any[]>([]);
-  const [savedItems, setSavedItems] = useState<any[]>([]);
+  const [bag, setbag] = useState<any[]>([]);
+  useEffect(() => {
+    // Simulate loading time
+    if (user) {
 
-  const fetchBag = async () => {
-    if (!user) return;
-
-    try {
-      setIsLoading(true);
-      const res = await axios.get(
-        `https://myntraclone-7ekz.onrender.com/bag/${user._id}`
-      );
-
-      setCartItems(res.data.active || []);
-      setSavedItems(res.data.saved || []);
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setIsLoading(false);
+      fetchproduct();
+    }
+  }, [user]);
+  const fetchproduct = async () => {
+    if (user) {
+      try {
+        setIsLoading(true);
+        const res = await axios.get(
+          `https://myntraclone-7ekz.onrender.com/bag/${user._id}`
+        );
+        setbag(res.data);
+      } catch (error) {
+        console.log(error);
+        setIsLoading(false);
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
-  useFocusEffect(
-    useCallback(() => {
-      fetchBag();
-    }, [user]));
-
-
-
-
   if (!user) {
     return (
       <View style={styles.container}>
@@ -96,33 +68,34 @@ export default function Bag() {
       </View>
     );
   }
-  const total = cartItems?.reduce(
-    (sum, item) => sum + item.productId.price * item.quantity,
+  const total = bag?.reduce(
+    (sum: any, item: any) => sum + item.productId.price * item.quantity,
     0
   );
-
-
-  const handleSaveForLater = async (bagId: string) => {
-    await axios.patch(
-      `https://myntraclone-7ekz.onrender.com/bag/save-for-later/${bagId}`
-    );
-    fetchBag();
-  };
-  const handleMoveToCart = async (bagId: string) => {
-    await axios.patch(
-      `https://myntraclone-7ekz.onrender.com/bag/move-to-cart/${bagId}`
-    );
-    fetchBag();
-  };
   const handledelete = async (itemid: any) => {
     try {
       await axios.delete(`https://myntraclone-7ekz.onrender.com/bag/${itemid}`)
-      fetchBag();
+      fetchproduct();
     } catch (error) {
       console.log(error)
     }
 
+  }
+  const updateQuantity = async (itemId: string, newQty: number) => {
+    if (newQty < 1) return;
+
+    try {
+      await axios.put(
+        `https://myntraclone-7ekz.onrender.com/bag/${itemId}`,
+        { quantity: newQty }
+      );
+      fetchproduct(); // refresh bag
+    } catch (error) {
+      console.log(error);
+    }
   };
+
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -130,8 +103,7 @@ export default function Bag() {
       </View>
 
       <ScrollView style={styles.content}>
-        {/* ACTIVE CART ITEMS */}
-        {cartItems.map((item) => (
+        {bag?.map((item: any) => (
           <View key={item._id} style={styles.bagItem}>
             <Image
               source={{ uri: item.productId.images[0] }}
@@ -144,13 +116,19 @@ export default function Bag() {
               <Text style={styles.itemPrice}>₹{item.productId.price}</Text>
 
               <View style={styles.quantityContainer}>
-                <TouchableOpacity style={styles.quantityButton}>
+                <TouchableOpacity
+                  style={styles.quantityButton}
+                  onPress={() => updateQuantity(item._id, item.quantity - 1)}
+                >
                   <Minus size={20} color="#3e3e3e" />
                 </TouchableOpacity>
 
                 <Text style={styles.quantity}>{item.quantity}</Text>
 
-                <TouchableOpacity style={styles.quantityButton}>
+                <TouchableOpacity
+                  style={styles.quantityButton}
+                  onPress={() => updateQuantity(item._id, item.quantity + 1)}
+                >
                   <Plus size={20} color="#3e3e3e" />
                 </TouchableOpacity>
 
@@ -162,51 +140,17 @@ export default function Bag() {
                 </TouchableOpacity>
               </View>
 
-              <TouchableOpacity
-                onPress={() => handleSaveForLater(item._id)}
-              >
-                <Text style={{ color: "#ff3f6c", marginTop: 8 }}>
-                  Save for Later
-                </Text>
-              </TouchableOpacity>
             </View>
           </View>
         ))}
-
-        {/* SAVED FOR LATER */}
-        {savedItems.length > 0 && (
-          <>
-            <Text style={styles.headerTitle}>Saved for Later</Text>
-
-            {savedItems.map((item) => (
-              <View key={item._id} style={styles.bagItem}>
-                <Image
-                  source={{ uri: item.productId.images[0] }}
-                  style={styles.itemImage}
-                />
-                <View style={styles.itemInfo}>
-                  <Text style={styles.brandName}>
-                    {item.productId.brand}
-                  </Text>
-                  <Text style={styles.itemName}>
-                    {item.productId.name}
-                  </Text>
-
-                  <TouchableOpacity
-                    disabled={isLoading}
-                    onPress={() => handleMoveToCart(item._id)}
-                  >
-                    <Text style={{ color: "#ff3f6c", marginTop: 8 }}>
-                      Move to Bag
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            ))}
-          </>
+        {bag.length === 0 && (
+          <View style={styles.emptyState}>
+            <ShoppingBag size={64} color="#ccc" />
+            <Text style={styles.emptyTitle}>Your bag is empty</Text>
+          </View>
         )}
-      </ScrollView>
 
+      </ScrollView>
 
       <View style={styles.footer}>
         <View style={styles.totalContainer}>

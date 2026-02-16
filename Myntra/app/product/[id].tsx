@@ -50,6 +50,29 @@ export default function ProductDetails() {
     fetchproduct();
   }, []);
   useEffect(() => {
+    const checkWishlist = async () => {
+      if (!user || !id) return;
+
+      try {
+        const res = await axios.get(
+          `https://myntraclone-7ekz.onrender.com/wishlist/${user._id}`
+        );
+
+        const exists = res.data.some(
+          (item: any) => item.productId._id === id
+        );
+
+        setiswishlist(exists);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    checkWishlist();
+  }, [user, id]);
+
+  // Recently viewed – PERFECT, keep as it is
+  useEffect(() => {
     if (product) {
       addRecentlyViewed({
         _id: product._id,
@@ -60,31 +83,30 @@ export default function ProductDetails() {
     }
   }, [product]);
 
+  // ✅ SAFE auto-scroll implementation
   useEffect(() => {
-    // Start auto-scroll
-    startAutoScroll();
+    if (!product?.images?.length) return;
+
+    autoScrollTimer.current = setInterval(() => {
+      setCurrentImageIndex((prevIndex) => {
+        const nextIndex = (prevIndex + 1) % product.images.length;
+
+        scrollViewRef.current?.scrollTo({
+          x: nextIndex * width,
+          animated: true,
+        });
+
+        return nextIndex;
+      });
+    }, 3000);
 
     return () => {
       if (autoScrollTimer.current) {
         clearInterval(autoScrollTimer.current);
       }
     };
-  }, [product]);
+  }, [product, width]);
 
-  const startAutoScroll = () => {
-    if (!product?.images?.length) return;
-
-    autoScrollTimer.current = setInterval(() => {
-      setCurrentImageIndex((prevIndex) => {
-        const nextIndex = (prevIndex + 1) % product.images.length;
-        scrollViewRef.current?.scrollTo({
-          x: nextIndex * width,
-          animated: true,
-        });
-        return nextIndex;
-      });
-    }, 3000);
-  };
 
   if (!product) {
     return (
@@ -100,52 +122,61 @@ export default function ProductDetails() {
     }
 
     try {
-      await axios.post(`https://myntraclone-7ekz.onrender.com/wishlist`, {
-        userId: user._id,
-        productId: id,
-      });
-      setiswishlist(true);
-      router.push("/wishlist");
+      if (iswishlist) {
+        await axios.delete(
+          `https://myntraclone-7ekz.onrender.com/wishlist/${user._id}/${id}`
+        );
+        setiswishlist(false);
+      } else {
+        await axios.post("https://myntraclone-7ekz.onrender.com/wishlist", {
+          userId: user._id,
+          productId: id,
+        });
+        setiswishlist(true);
+      }
     } catch (error) {
       console.log(error);
     }
   };
+
   const handleAddToBag = async () => {
     if (!user) {
-    router.push("/login");
-    return;
-  }
-  if (!selectedSize) {
-    Alert.alert("Select Size", "Please select a size before adding to bag");
-    return;
-  }
-  try {
-    await axios.post("https://myntraclone-7ekz.onrender.com/bag", {
-      userId: user._id,
-      productId: id,
-      size: selectedSize,
-      quantity: 1,
-    });
+      router.push("/login");
+      return;
+    }
+    if (!selectedSize) {
+      Alert.alert("Select Size", "Please select a size before adding to bag");
+      return;
+    }
+    try {
+      setLoading(true);
+      await axios.post("https://myntraclone-7ekz.onrender.com/bag", {
+        userId: user._id,
+        productId: id,
+        size: selectedSize,
+        quantity: 1,
+      });
 
-    Alert.alert(
-      "Added to Bag 🛍️",
-      "Item has been added successfully",
-      [
-        {
-          text: "Go to Bag",
-          onPress: () => router.replace("/bag"),
-        },
-        {
-          text: "Continue Shopping",
-          style: "cancel",
-        },
-      ]
-    );
-  } catch (error) {
-    console.log(error);
-    Alert.alert("Error", "Something went wrong. Please try again.");
-  }
-};
+      Alert.alert(
+        "Added to Bag 🛍️",
+        "Item has been added successfully",
+        [
+          {
+            text: "Go to Bag",
+            onPress: () => router.replace("/bag"),
+          },
+          {
+            text: "Continue Shopping",
+            style: "cancel",
+          },
+        ]
+      );
+    } catch (error) {
+      Alert.alert("Error", "Item already in bag or something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleScroll = (event: any) => {
     const contentOffset = event.nativeEvent.contentOffset;
@@ -155,7 +186,6 @@ export default function ProductDetails() {
     // Reset auto-scroll timer when user manually scrolls
     if (autoScrollTimer.current) {
       clearInterval(autoScrollTimer.current);
-      startAutoScroll();
     }
   };
 
