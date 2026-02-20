@@ -8,6 +8,11 @@ const ProductSchema = new mongoose.Schema(
     description: String,
     sizes: [String],
     images: [String],
+    ccategory:  {type: String, index: true},
+    subbcategory: {type: String},
+    tags: [String],
+    popularityScore: { type: Number, default: 0 }
+
   },
   { timestamps: true }
 );

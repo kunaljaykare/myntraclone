@@ -71,7 +71,6 @@ export default function ProductDetails() {
     checkWishlist();
   }, [user, id]);
 
-  // Recently viewed – PERFECT, keep as it is
   useEffect(() => {
     if (product) {
       addRecentlyViewed({
@@ -82,8 +81,22 @@ export default function ProductDetails() {
       });
     }
   }, [product]);
+  // Track product view 
+useEffect(() => {
+  if (!user?._id || !product?._id) return;
 
-  // ✅ SAFE auto-scroll implementation
+  axios.post(
+    "https://myntraclone-7ekz.onrender.com/api/track-product/view",
+    {
+      userId: user._id,
+      productId: product._id,
+    }
+  ).catch(err => {
+    console.log("Track product failed", err);
+  });
+}, [product?._id, user?._id]);
+
+
   useEffect(() => {
     if (!product?.images?.length) return;
 
