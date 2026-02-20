@@ -20,7 +20,7 @@ const UserActivitySchema = new mongoose.Schema(
         }
         }
     ],
-    wishList: [
+    wishListProducts: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Product",

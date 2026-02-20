@@ -1,3 +1,7 @@
+const express = require("express");
+const router = express.Router();
+const UserActivity = require("../models/UserActivity");
+
 router.post("/track-product", async (req, res) => {
     try {
     const { userId, productId } = req.body;
@@ -24,3 +28,4 @@ router.post("/track-product", async (req, res) => {
     res.status(500).json({ message: "Tracking failed" });
     }
 });
+module.exports = router;

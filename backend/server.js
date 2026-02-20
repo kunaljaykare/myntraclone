@@ -7,6 +7,7 @@ const productrouter = require("./routes/Productroutes");
 const Bagroutes = require("./routes/Bagroutes");
 const Wishlistroutes = require("./routes/Wishlistroutes");
 const OrderRoutes = require("./routes/OrderRoutes");
+const TrackProductRoutes = require("./routes/TrackProduct");
 const cors = require('cors');
 dotenv.config();
 const app = express();
@@ -24,7 +25,7 @@ app.use("/product", productrouter);
 app.use("/bag", Bagroutes);
 app.use("/wishlist", Wishlistroutes);
 app.use("/Order", OrderRoutes);
-app.use("/api/track-product", TrackProduct);
+app.use("/api/track-product", TrackProductRoutes);
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => {
