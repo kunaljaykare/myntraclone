@@ -71,7 +71,7 @@ export default function Home() {
         <Text style={styles.logo}>MYNTRA</Text>
         <TouchableOpacity
           style={styles.searchButton}
-          onPress={() => router.push("/search")}
+          onPress={() => router.push("/(tabs)/search")}
         >
           <Search size={24} color="#3e3e3e" />
         </TouchableOpacity>
