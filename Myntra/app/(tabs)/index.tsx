@@ -31,7 +31,9 @@ const deals = [
 
 export default function Home() {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
+  //const [isLoading, setIsLoading] = useState(false);
+  const [loadingCategories, setLoadingCategories] = useState(false);
+  const [loadingProducts, setLoadingProducts] = useState(false);
   const [product, setproduct] = useState<any>(null);
   const [categories, setcategories] = useState<any>(null);
   const { user } = useAuth();
@@ -45,16 +47,20 @@ export default function Home() {
   useEffect(() => {
     const fetchproduct = async () => {
       try {
-        setIsLoading(true);
-        const cat = await axios.get("https://myntraclone-7ekz.onrender.com/category");
-        const product = await axios.get("https://myntraclone-7ekz.onrender.com/product");
-        setcategories(cat.data);
-        setproduct(product.data);
+        setLoadingCategories(true);
+        setLoadingProducts(true);
+        const [catRes, productRes] = await Promise.all([
+          axios.get("https://myntraclone-7ekz.onrender.com/category"),
+          axios.get("https://myntraclone-7ekz.onrender.com/product"),
+        ]);
+
+        setcategories(catRes.data);
+        setproduct(productRes.data);
       } catch (error) {
         console.log(error);
-        setIsLoading(false);
       } finally {
-        setIsLoading(false);
+        setLoadingCategories(false);
+        setLoadingProducts(false);
       }
     };
     fetchproduct();
@@ -63,7 +69,10 @@ export default function Home() {
     <ScrollView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.logo}>MYNTRA</Text>
-        <TouchableOpacity style={styles.searchButton}>
+        <TouchableOpacity
+          style={styles.searchButton}
+          onPress={() => router.push("/search")}
+        >
           <Search size={24} color="#3e3e3e" />
         </TouchableOpacity>
       </View>
@@ -88,7 +97,7 @@ export default function Home() {
           showsHorizontalScrollIndicator={false}
           style={styles.categoriesScroll}
         >
-          {isLoading ? (
+          {loadingCategories ? (
             <ActivityIndicator
               size="large"
               color="#ff3f6c"
@@ -98,7 +107,15 @@ export default function Home() {
             <Text style={styles.emptyText}>No categories available</Text>
           ) : (
             categories.map((category: any) => (
-              <TouchableOpacity key={category._id} style={styles.categoryCard}>
+              <TouchableOpacity
+                key={category._id}
+                style={styles.categoryCard}
+                onPress={() =>
+                  router.push({
+                    pathname: "/(tabs)/categories",
+                    params: { categoryId: category._id },
+                  })
+                }>
                 <Image
                   source={{ uri: category.image }}
                   style={styles.categoryImage}
@@ -138,46 +155,40 @@ export default function Home() {
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>TRENDING NOW</Text>
         </View>
-        <View style={styles.productsGrid}>
-          {isLoading ? (
-            <ActivityIndicator
-              size="large"
-              color="#ff3f6c"
-              style={styles.loader}
-            />
-          ) : !product || product.length === 0 ? (
-            <Text style={styles.emptyText}>No Product available</Text>
-          ) : (
-            <View style={styles.productsGrid}>
-              {product.map((product: any) => (
-                <TouchableOpacity
-                  key={product._id}
-                  style={styles.productCard}
-                  onPress={() => handleProductPress(product._id)}
-                >
-                  <Image
-                    source={{
-                      uri: product.images[0
-
-                      ]
-                    }}
-                    style={styles.productImage}
-                  />
-                  <View style={styles.productInfo}>
-                    <Text style={styles.brandName}>{product.brand}</Text>
-                    <Text style={styles.productName}>{product.name}</Text>
-                    <View style={styles.priceRow}>
-                      <Text style={styles.productPrice}>{product.price}</Text>
-                      <Text style={styles.discount}>{product.discount}</Text>
-                    </View>
+        {loadingProducts ? (
+          <ActivityIndicator size="large" color="#ff3f6c" />
+        ) : !product || product.length === 0 ? (
+          <Text style={styles.emptyText}>No Product available</Text>
+        ) : (
+          <View style={styles.productsGrid}>
+            {product.map((item: any) => (
+              <TouchableOpacity
+                key={item._id}
+                style={styles.productCard}
+                onPress={() => handleProductPress(item._id)}
+              >
+                <Image
+                  source={{
+                    uri: item.images?.[0] || "https://via.placeholder.com/300",
+                  }}
+                  style={styles.productImage}
+                />
+                <View style={styles.productInfo}>
+                  <Text style={styles.brandName}>{item.brand}</Text>
+                  <Text style={styles.productName}>{item.name}</Text>
+                  <View style={styles.priceRow}>
+                    <Text style={styles.productPrice}>₹{item.price}</Text>
+                    {item.discount && (
+                      <Text style={styles.discount}>{item.discount}</Text>
+                    )}
                   </View>
-                </TouchableOpacity>
-              ))}
-            </View>
-          )}
-        </View>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
       </View>
-    </ScrollView>
+    </ScrollView >
   );
 }
 
@@ -205,7 +216,7 @@ const styles = StyleSheet.create({
   logo: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#3e3e3e",
+    color: "#ff3f6c",
   },
   searchButton: {
     padding: 8,

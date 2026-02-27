@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
   View
 } from "react-native";
-
+import { useLocalSearchParams } from "expo-router";
 import axios from "axios";
 import { useRouter } from "expo-router";
 import { Search, X } from "lucide-react-native";
@@ -17,13 +17,12 @@ import React, { useEffect, useState } from "react";
 
 export default function TabTwoScreen() {
   const router = useRouter();
+  const { categoryId } = useLocalSearchParams();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(
-    null
-  );
+  const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [categories, setcategories] = useState<any>(null);
+  const [categories, setcategories] = useState<any>([]);
   useEffect(() => {
     const fetchproduct = async () => {
       try {
@@ -32,13 +31,17 @@ export default function TabTwoScreen() {
         setcategories(cat.data);
       } catch (error) {
         console.log(error);
-        setIsLoading(false);
       } finally {
         setIsLoading(false);
       }
     };
     fetchproduct();
   }, []);
+  useEffect(() => {
+    if (categoryId && categories.length > 0) {
+      setSelectedCategory(categoryId as string);
+    }
+  }, [categoryId, categories]);
   if (isLoading) {
     return (
       <View style={styles.loaderContainer}>
@@ -46,10 +49,12 @@ export default function TabTwoScreen() {
       </View>
     );
   }
-  if (!categories) {
+  if (categories.length === 0 && !isLoading) {
     return (
       <View style={styles.container}>
-        <Text>Categories not found</Text>
+        <Text style={{ textAlign: "center", marginTop: 40 }}>
+          Categories not found
+        </Text>
       </View>
     );
   }
@@ -68,17 +73,18 @@ export default function TabTwoScreen() {
     setSelectedSubcategory(null);
     setSearchQuery("");
   };
-  const handleSubcategorySelect = (subcategoryId: string) => {
-    setSelectedSubcategory(subcategoryId);
+  const handleSubcategoryFromCategory = (categoryId: string, sub: string) => {
+    setSelectedCategory(categoryId);
+    setSelectedSubcategory(sub);
     setSearchQuery("");
   };
   const filtercategories = categories?.filter(
     (category: any) =>
       category.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      category.subcategory.some((subcategory: any) =>
+      category.subcategory?.some((subcategory: any) =>
         subcategory.toLowerCase().includes(searchQuery.toLowerCase())
       ) ||
-      category.productId.some(
+      category.productId?.some(
         (product: any) =>
           product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
           product.brand.toLowerCase().includes(searchQuery.toLowerCase())
@@ -87,20 +93,32 @@ export default function TabTwoScreen() {
   const selectedcategorydata = selectedCategory
     ? categories?.find((cat: any) => cat._id === selectedCategory)
     : null;
-  const renderProducts = (products: any) => {
-    return products?.map((product: any) => (
+  const renderProducts = (products: any[]) => {
+    const filteredProducts = selectedSubcategory
+      ? products.filter(
+        (product) =>
+          product.subcategory === selectedSubcategory
+      )
+      : products;
+
+    return filteredProducts?.map((product: any) => (
       <TouchableOpacity
         key={product._id}
         style={styles.productCard}
         onPress={() => router.push(`/product/${product._id}`)}
       >
-        <Image source={{ uri: product.images[0] }} style={styles.productImage} />
+        <Image
+          source={{ uri: product.images?.[0] || "https://via.placeholder.com/300" }}
+          style={styles.productImage}
+        />
         <View style={styles.productInfo}>
           <Text style={styles.brandName}>{product.brand}</Text>
           <Text style={styles.productName}>{product.name}</Text>
           <View style={styles.priceRow}>
             <Text style={styles.price}>₹{product.price}</Text>
-            <Text style={styles.discount}>{product.discount}</Text>
+            {product.discount && (
+              <Text style={styles.discount}>{product.discount}</Text>
+            )}
           </View>
         </View>
       </TouchableOpacity>
@@ -149,7 +167,7 @@ export default function TabTwoScreen() {
                         <TouchableOpacity
                           key={index}
                           style={styles.subcategoryTag}
-                          onPress={() => handleSubcategorySelect(sub)}
+                          onPress={() => handleSubcategoryFromCategory(category._id, sub)}
                         >
                           <Text style={styles.subcategoryText}>{sub}</Text>
                         </TouchableOpacity>
@@ -159,6 +177,11 @@ export default function TabTwoScreen() {
                 </View>
               </TouchableOpacity>
             ))}
+            {filtercategories.length === 0 && (
+              <Text style={{ textAlign: "center", marginTop: 40 }}>
+                No results found
+              </Text>
+            )}
           </View>
         )}
 
@@ -167,7 +190,10 @@ export default function TabTwoScreen() {
             <View style={styles.categoryHeader}>
               <TouchableOpacity
                 style={styles.backButton}
-                onPress={() => setSelectedCategory(null)}
+                onPress={() => {
+                  setSelectedCategory(null);
+                  setSelectedSubcategory(null);
+                }}
               >
                 <Text style={styles.backButtonText}>← Back to Categories</Text>
               </TouchableOpacity>
@@ -189,13 +215,17 @@ export default function TabTwoScreen() {
                       styles.subcategoryButton,
                       selectedSubcategory === sub && styles.selectedSubcategory,
                     ]}
-                    onPress={() => handleSubcategorySelect(sub)}
+                    onPress={() => {
+                      if (selectedCategory) {
+                        handleSubcategoryFromCategory(selectedCategory, sub);
+                      }
+                    }}
                   >
                     <Text
                       style={[
                         styles.subcategoryButtonText,
                         selectedSubcategory === sub &&
-                          styles.selectedSubcategoryText,
+                        styles.selectedSubcategoryText,
                       ]}
                     >
                       {sub}
@@ -206,6 +236,11 @@ export default function TabTwoScreen() {
             </ScrollView>
             <View style={styles.productsGrid}>
               {renderProducts(selectedcategorydata?.productId)}
+              {selectedcategorydata?.productId?.length === 0 && (
+                <Text style={{ textAlign: "center", marginTop: 40 }}>
+                  No products available
+                </Text>
+              )}
             </View>
           </View>
         )}
