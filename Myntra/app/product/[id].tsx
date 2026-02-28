@@ -1,4 +1,4 @@
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/constants/context/AuthContext";
 import axios from "axios";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Heart, ShoppingBag } from "lucide-react-native";
@@ -8,6 +8,7 @@ import { addRecentlyViewed } from "@/utils/recentlyViewed";
 import {
   ActivityIndicator,
   Alert,
+  FlatList,
   Image,
   ScrollView,
   StyleSheet,
@@ -20,7 +21,10 @@ import {
 export default function ProductDetails() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
+  const trackedRef = useRef<string | null>(null);
   const { width } = useWindowDimensions();
+  const [recommendations, setRecommendations] = useState<any[]>([]);
+  const [recLoading, setRecLoading] = useState(true);
   const [selectedSize, setSelectedSize] = useState("");
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -72,6 +76,43 @@ export default function ProductDetails() {
   }, [user, id]);
 
   useEffect(() => {
+    if (!id) return;
+
+    let isMounted = true;
+    const controller = new AbortController();
+    setRecLoading(true);
+
+    axios.get(
+      `https://myntraclone-7ekz.onrender.com/api/recommendations/${id}`,
+      {
+        params: { userId: user?._id },
+        signal: controller.signal,
+      }
+    )
+      .then(res => {
+        if (isMounted) {
+          setRecommendations(res.data.slice(0, 10));
+        }
+      })
+      .catch(err => {
+        if (!axios.isCancel(err)) {
+          console.log("Recommendation error", err);
+        }
+      })
+      .finally(() => isMounted && setRecLoading(false));
+
+    return () => {
+      isMounted = false;
+      controller.abort();
+    };
+  }, [id]);
+
+  useEffect(() => {
+    setCurrentImageIndex(0);
+    scrollViewRef.current?.scrollTo({ x: 0, animated: false });
+  }, [id]);
+
+  useEffect(() => {
     if (product) {
       addRecentlyViewed({
         _id: product._id,
@@ -82,19 +123,23 @@ export default function ProductDetails() {
     }
   }, [product]);
   // Track product view 
-useEffect(() => {
-  if (!user?._id || !product?._id) return;
 
-  axios.post(
-    "https://myntraclone-7ekz.onrender.com/api/track-product/view",
-    {
-      userId: user._id,
-      productId: product._id,
-    }
-  ).catch(err => {
-    console.log("Track product failed", err);
-  });
-}, [product?._id, user?._id]);
+  useEffect(() => {
+    if (!user?._id || !product?._id) return;
+
+    if (trackedRef.current === `${user._id}_${product._id}`) return;
+
+    trackedRef.current = `${user._id}_${product._id}`;
+
+    axios.post(
+      "https://myntraclone-7ekz.onrender.com/api/track-product/view",
+      {
+        userId: user?._id,
+        productId: product._id,
+        source: "PRODUCT_PAGE",
+      }
+    ).catch(() => { });
+  }, [product?._id, user?._id]);
 
 
   useEffect(() => {
@@ -128,7 +173,7 @@ useEffect(() => {
       </View>
     );
   }
-  const handleAddwishlist = async () => {
+  const handleAddwishlist = useCallback(async () => {
     if (!user) {
       router.push("/login");
       return;
@@ -150,9 +195,9 @@ useEffect(() => {
     } catch (error) {
       console.log(error);
     }
-  };
+  }, [iswishlist, user, id]);
 
-  const handleAddToBag = async () => {
+  const handleAddToBag = useCallback(async () => {
     if (!user) {
       router.push("/login");
       return;
@@ -189,18 +234,60 @@ useEffect(() => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedSize, user, id, router]);
 
   const handleScroll = (event: any) => {
     const contentOffset = event.nativeEvent.contentOffset;
     const imageIndex = Math.round(contentOffset.x / width);
     setCurrentImageIndex(imageIndex);
 
-    // Reset auto-scroll timer when user manually scrolls
     if (autoScrollTimer.current) {
       clearInterval(autoScrollTimer.current);
     }
+
+    autoScrollTimer.current = setTimeout(() => {
+      autoScrollTimer.current = setInterval(() => {
+        setCurrentImageIndex(prev => {
+          const next = (prev + 1) % product.images.length;
+          scrollViewRef.current?.scrollTo({
+            x: next * width,
+            animated: true,
+          });
+          return next;
+        });
+      }, 3000);
+    }, 4000);
   };
+
+  const RecommendationCard = React.memo(({ item }: any) => (
+    <TouchableOpacity
+      style={styles.recommendationCard}
+      onPress={() => {
+        axios.post(
+          "https://myntraclone-7ekz.onrender.com/api/track-product/view",
+          {
+            userId: user?._id,
+            productId: item._id,
+            source: "RECOMMENDATION",
+          }
+        ).catch(() => { });
+
+        router.push(`/product/${item._id}`);
+      }}
+    >
+      <Image
+        source={{ uri: item.images[0] }}
+        style={styles.recommendationImage}
+      />
+      <Text numberOfLines={1} style={styles.recommendationName}>
+        {item.name}
+      </Text>
+      <Text style={styles.recommendationPrice}>
+        ₹{item.price}
+      </Text>
+    </TouchableOpacity>
+  ));
+
 
   if (isLoading) {
     return (
@@ -295,6 +382,34 @@ useEffect(() => {
           </View>
         </View>
       </ScrollView>
+      {recLoading && (
+        <View style={{ paddingVertical: 30 }}>
+          <ActivityIndicator size="large" color="#ff3f6c" />
+        </View>
+      )}
+      {!recLoading && recommendations.length === 0 && (
+        <View style={{ padding: 20 }}>
+          <Text style={{ color: "#999", textAlign: "center" }}>
+            Keep browsing to see personalized recommendations 👀
+          </Text>
+        </View>
+      )}
+
+      {!recLoading && recommendations.length > 0 && (
+        <View style={styles.recommendationSection}>
+          <Text style={styles.recommendationTitle}>You May Also Like</Text>
+          <FlatList
+            horizontal
+            snapToInterval={155}
+            decelerationRate="fast"
+            contentContainerStyle={{ paddingRight: 20 }}
+            showsHorizontalScrollIndicator={false}
+            data={recommendations}
+            keyExtractor={item => item._id}
+            renderItem={({ item }) => <RecommendationCard item={item} />}
+          />
+        </View>
+      )}
 
       <View style={styles.footer}>
         <TouchableOpacity
@@ -312,7 +427,7 @@ useEffect(() => {
           )}
         </TouchableOpacity>
       </View>
-    </View>
+    </View >
   );
 }
 
@@ -450,5 +565,34 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
+  },
+  recommendationSection: {
+    paddingHorizontal: 20,
+    paddingBottom: 30,
+  },
+  recommendationTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 15,
+    color: "#3e3e3e",
+  },
+  recommendationCard: {
+    width: 140,
+    marginRight: 15,
+  },
+  recommendationImage: {
+    width: "100%",
+    height: 180,
+    borderRadius: 10,
+  },
+  recommendationName: {
+    marginTop: 6,
+    fontSize: 14,
+    color: "#333",
+  },
+  recommendationPrice: {
+    fontSize: 14,
+    fontWeight: "bold",
+    color: "#ff3f6c",
   },
 });

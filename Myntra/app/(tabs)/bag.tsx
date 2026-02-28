@@ -10,7 +10,7 @@ import {
 import { useRouter } from "expo-router";
 import { ShoppingBag, Minus, Plus, Trash2 } from "lucide-react-native";
 import { useEffect, useState } from "react";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/constants/context/AuthContext";
 import axios from "axios";
 
 export default function Bag() {

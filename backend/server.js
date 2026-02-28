@@ -26,6 +26,7 @@ app.use("/bag", Bagroutes);
 app.use("/wishlist", Wishlistroutes);
 app.use("/Order", OrderRoutes);
 app.use("/api/track-product", TrackProductRoutes);
+app.use("/api/recommendations", require("./routes/Recommendationroutes"));
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => {

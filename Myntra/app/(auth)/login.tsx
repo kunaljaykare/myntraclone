@@ -11,7 +11,7 @@ import {
 import { useRouter } from "expo-router";
 import React from "react";
 import { Eye, EyeOff } from "lucide-react-native";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/constants/context/AuthContext";
 
 export default function Login() {
   const { login } = useAuth();

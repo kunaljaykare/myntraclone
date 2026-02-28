@@ -17,7 +17,7 @@ import {
   ChevronRight,
 } from "lucide-react-native";
 import React from "react";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/constants/context/AuthContext";
 
 const menuItems = [
   { icon: Package, label: "Orders", route: "/orders" },
