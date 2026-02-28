@@ -18,6 +18,25 @@ import {
   View,
 } from "react-native";
 
+const RecommendationCard = React.memo(
+  ({ item, onPress }: { item: any; onPress: () => void }) => (
+    <TouchableOpacity
+      style={styles.recommendationCard}
+      activeOpacity={0.85}
+      onPress={onPress}
+    >
+      <Image
+        source={{ uri: item.images[0] }}
+        style={styles.recommendationImage}
+      />
+      <Text numberOfLines={1} style={styles.recommendationName}>
+        {item.name}
+      </Text>
+      <Text style={styles.recommendationPrice}>₹{item.price}</Text>
+    </TouchableOpacity>
+  )
+);
+
 export default function ProductDetails() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
@@ -30,13 +49,11 @@ export default function ProductDetails() {
   const [isLoading, setIsLoading] = useState(true);
   const [loading, setLoading] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
-  const autoScrollTimer = useRef<number | null>(null);
+  const autoScrollTimer = useRef<ReturnType<typeof setInterval> | null>(null);
   const { user } = useAuth();
   const [product, setproduct] = useState<any>(null);
   const [iswishlist, setiswishlist] = useState(false);
   useEffect(() => {
-    // Simulate loading time
-
     const fetchproduct = async () => {
       try {
         setIsLoading(true);
@@ -105,7 +122,7 @@ export default function ProductDetails() {
       isMounted = false;
       controller.abort();
     };
-  }, [id]);
+  }, [id, user?._id]);
 
   useEffect(() => {
     setCurrentImageIndex(0);
@@ -166,13 +183,6 @@ export default function ProductDetails() {
   }, [product, width]);
 
 
-  if (!product) {
-    return (
-      <View style={styles.container}>
-        <Text>Product not found</Text>
-      </View>
-    );
-  }
   const handleAddwishlist = useCallback(async () => {
     if (!user) {
       router.push("/login");
@@ -259,35 +269,6 @@ export default function ProductDetails() {
     }, 4000);
   };
 
-  const RecommendationCard = React.memo(({ item }: any) => (
-    <TouchableOpacity
-      style={styles.recommendationCard}
-      onPress={() => {
-        axios.post(
-          "https://myntraclone-7ekz.onrender.com/api/track-product/view",
-          {
-            userId: user?._id,
-            productId: item._id,
-            source: "RECOMMENDATION",
-          }
-        ).catch(() => { });
-
-        router.push(`/product/${item._id}`);
-      }}
-    >
-      <Image
-        source={{ uri: item.images[0] }}
-        style={styles.recommendationImage}
-      />
-      <Text numberOfLines={1} style={styles.recommendationName}>
-        {item.name}
-      </Text>
-      <Text style={styles.recommendationPrice}>
-        ₹{item.price}
-      </Text>
-    </TouchableOpacity>
-  ));
-
 
   if (isLoading) {
     return (
@@ -309,7 +290,7 @@ export default function ProductDetails() {
             onScroll={handleScroll}
             scrollEventThrottle={16}
           >
-            {product.images.map((image: any, index: any) => (
+            {product?.images?.map((image: string, index: number) => (
               <Image
                 key={index}
                 source={{ uri: image }}
@@ -406,7 +387,23 @@ export default function ProductDetails() {
             showsHorizontalScrollIndicator={false}
             data={recommendations}
             keyExtractor={item => item._id}
-            renderItem={({ item }) => <RecommendationCard item={item} />}
+            renderItem={({ item }) => (
+              <RecommendationCard
+                item={item}
+                onPress={() => {
+                  axios.post(
+                    "https://myntraclone-7ekz.onrender.com/api/track-product/view",
+                    {
+                      userId: user?._id,
+                      productId: item._id,
+                      source: "RECOMMENDATION",
+                    }
+                  ).catch(() => { });
+
+                  router.push(`/product/${item._id}`);
+                }}
+              />
+            )}
           />
         </View>
       )}
