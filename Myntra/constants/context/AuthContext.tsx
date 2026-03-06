@@ -1,5 +1,6 @@
 import { clearUserData, getUserData, saveUserData } from "@/utils/storage";
 import axios from "axios";
+import { registerForPushNotificationsAsync } from "@/utils/registerForPushNotifications";
 import React, { createContext, useContext, useEffect, useState } from "react";
 type AuthContextType = {
   isAuthenticated: boolean;
@@ -12,6 +13,7 @@ type AuthContextType = {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+  const tokenRegistered = React.useRef(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<{
     _id: string;
@@ -28,37 +30,78 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
     })();
   }, []);
+  useEffect(() => {
+    if (!user || tokenRegistered.current) return;
+
+    const setupNotifications = async () => {
+      try {
+        const expoPushToken = await registerForPushNotificationsAsync();
+
+        if (!expoPushToken) return;
+
+        await axios.post(
+          "https://myntraclone-7ekz.onrender.com/api/notifications/register-device",
+          {
+            token: expoPushToken,
+            deviceType: "android",
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${user._id}`,
+            },
+          }
+        );
+        tokenRegistered.current = true;
+
+        console.log("Push token registered successfully");
+      } catch (error) {
+        console.error("Notification setup failed:", error);
+      }
+    };
+
+    setupNotifications();
+  }, [user]);
 
   const login = async (email: string, password: string) => {
-    // 👉 Replace with your real API URL
-    const res = await axios.post("https://myntraclone-7ekz.onrender.com/user/login", {
-      email,
-      password,
-    });
+    const res = await axios.post(
+      "https://myntraclone-7ekz.onrender.com/user/login",
+      {
+        email,
+        password,
+      });
 
-    const data = await res.data.user;
+    const data = res.data.user;
     if (data.fullName) {
       await saveUserData(data._id, data.fullName, data.email);
-      setUser({ _id: data._id, name: data.name, email: data.email });
+      setUser({ _id: data._id, name: data.fullName, email: data.email });
       setIsAuthenticated(true);
     } else {
-      throw new Error(data.message || "Login failed");
+      throw new Error("Login failed");
     }
   };
-  const Signup = async (fullName: string, email: string, password: string) => {
-    // 👉 Replace with your real API URL
-    const res = await axios.post("https://myntraclone-7ekz.onrender.com/user/signup", {
-      fullName,
-      email,
-      password,
-    });
-    const data = await res.data.user;
+  const Signup = async (
+    fullName: string,
+    email: string,
+    password: string
+  ) => {
+    const res = await axios.post(
+      "https://myntraclone-7ekz.onrender.com/user/signup",
+      {
+        fullName,
+        email,
+        password,
+      });
+    const data = res.data.user;
     if (data.fullName) {
       await saveUserData(data._id, data.fullName, data.email);
-      setUser({ _id: data._id, name: data.name, email: data.email });
+      setUser({
+        _id: data._id,
+        name: data.fullName,
+        email: data.email
+      });
       setIsAuthenticated(true);
     } else {
-      throw new Error(data.message || "Login failed");
+      throw new Error("Signup failed");
     }
   };
   const logout = async () => {
