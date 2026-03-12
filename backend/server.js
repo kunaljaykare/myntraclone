@@ -11,7 +11,7 @@ const Bagroutes = require("./routes/Bagroutes");
 const Wishlistroutes = require("./routes/Wishlistroutes");
 const OrderRoutes = require("./routes/OrderRoutes");
 const TrackProductRoutes = require("./routes/TrackProduct");
-const notificationRoutes = require("./routes/NotificationRoutes");
+const notificationRoutes = require("./routes/notificationsRoutes");
 
 dotenv.config();
 

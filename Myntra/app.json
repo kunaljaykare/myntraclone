@@ -17,7 +17,8 @@
         "foregroundImage": "./assets/images/myntra.jpg"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.kunaljaykare.myntraclone"
     },
     "web": {
       "output": "static",

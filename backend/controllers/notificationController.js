@@ -1,4 +1,4 @@
-const Device = require("../models/Device");
+const Device = require("../models/DeviceToken");
 const { Expo } = require("expo-server-sdk");
 
 let expo = new Expo();
