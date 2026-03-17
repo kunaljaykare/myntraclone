@@ -4,26 +4,35 @@ import {
   ThemeProvider,
 } from "@react-navigation/native";
 import { useFonts } from "expo-font";
-import { Stack } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
 import "react-native-reanimated";
 import * as Notifications from "expo-notifications";
+import axios from "axios";
+import React from "react";
 
+import { AuthProvider, useAuth } from "@/constants/context/AuthContext";
 import { registerForPushNotificationsAsync } from "@/utils/registerForPushNotifications";
 import { useColorScheme } from "@/hooks/useColorScheme";
-import React from "react";
-import { AuthProvider } from "@/constants/context/AuthContext";
 
 // Prevent splash screen auto hide
 SplashScreen.preventAutoHideAsync();
 
-declare global {
-  var isAuthenticated: boolean;
-}
-
-global.isAuthenticated = false;
+/*
+Notification handler
+Ensures notifications appear even when app is open
+*/
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: false,
+    shouldShowBanner: true,
+    shouldShowList: true,
+  }),
+});
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -39,51 +48,108 @@ export default function RootLayout() {
     }
   }, [loaded]);
 
-  // 🔔 Push Notification Setup
+  if (!loaded) return null;
+
+  return (
+    <AuthProvider>
+      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+        <RootLayoutNav />
+      </ThemeProvider>
+    </AuthProvider>
+  );
+}
+
+/*
+Main Navigation Layout
+AuthProvider is now mounted so useAuth() works correctly
+*/
+function RootLayoutNav() {
+  const router = useRouter();
+  const { authToken } = useAuth();
+
+  /*
+  Register push notifications after login
+  */
   useEffect(() => {
+    if (!authToken) return;
+
     async function setupNotifications() {
-      const token = await registerForPushNotificationsAsync();
-      console.log("Expo Push Token:", token);
+      const expoToken = await registerForPushNotificationsAsync();
+
+      if (!expoToken) return;
+
+      console.log("Expo Push Token:", expoToken);
+
+      try {
+        await axios.post(
+          "https://myntraclone-7ekz.onrender.com/api/notifications/register-device",
+          {
+            token: expoToken,
+            deviceType: "android",
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${authToken}`,
+            },
+          }
+        );
+
+        console.log("Device token saved to backend");
+      } catch (error) {
+        console.log("Failed to register device:", error);
+      }
     }
 
     setupNotifications();
+  }, [authToken]);
 
-    // Listener when notification received (foreground)
+  /*
+  Notification Listeners
+  */
+  useEffect(() => {
+    // Foreground notification
     const notificationListener =
       Notifications.addNotificationReceivedListener((notification) => {
         console.log("Notification received:", notification);
       });
 
-    // Listener when user taps notification
+    // When user taps notification
     const responseListener =
       Notifications.addNotificationResponseReceivedListener((response) => {
-        console.log("Notification tapped:", response);
+        const data = response.notification.request.content.data;
+
+        console.log("Notification tapped:", data);
+
+        if (data?.screen === "orders") {
+          router.push("/orders");
+        }
+
+        if (data?.screen === "home") {
+          router.push("/");
+        }
       });
 
     return () => {
       notificationListener.remove();
       responseListener.remove();
     };
-  }, []);
-
-  if (!loaded) {
-    return null;
-  }
+  }, [router]);
 
   return (
-    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <AuthProvider>
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="(tabs)" />
-          <Stack.Screen name="(auth)" />
-        </Stack>
-        <StatusBar style="auto" />
-      </AuthProvider>
-    </ThemeProvider>
+    <>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="(auth)" />
+      </Stack>
+
+      <StatusBar style="auto" />
+    </>
   );
 }
 
-// Expo Router setting
+/*
+Expo Router Setting
+*/
 export const unstable_settings = {
   staticRendering: false,
 };

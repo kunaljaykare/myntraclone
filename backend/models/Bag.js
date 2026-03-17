@@ -19,7 +19,7 @@ const bagSchema = new mongoose.Schema({
   savedForLater: {
     type: Boolean,
     default: false,
-  },
-});
+  }
+}, { timestamps: true });
 
 module.exports = mongoose.model("Bag", bagSchema);

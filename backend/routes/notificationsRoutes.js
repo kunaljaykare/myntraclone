@@ -60,9 +60,9 @@ Sends a test notification to the logged-in user's device
 router.post("/send-test", authMiddleware, async (req, res) => {
   try {
 
-    const device = await DeviceToken.findOne({ userId: req.user._id });
+    const devices = await DeviceToken.find({ userId: req.user._id });
 
-    if (!device) {
+    if (!devices || devices.length === 0) {
       return res.status(404).json({
         success: false,
         message: "Device token not found",

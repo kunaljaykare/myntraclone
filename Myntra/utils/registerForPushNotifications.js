@@ -23,11 +23,7 @@ export async function registerForPushNotificationsAsync() {
             return;
         }
 
-        token = (
-            await Notifications.getExpoPushTokenAsync({
-                projectId: Constants.expoConfig.extra.eas.projectId,
-            })
-        ).data;
+        token = (await Notifications.getExpoPushTokenAsync()).data;
 
         console.log("Push notification token:", token);
     } else {

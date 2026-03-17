@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const cors = require("cors");
 const morgan = require("morgan");
-
+require("./utils/cronJobs"); 
 const userrouter = require("./routes/Userroutes");
 const categoryrouter = require("./routes/Categoryroutes");
 const productrouter = require("./routes/Productroutes");
@@ -12,7 +12,7 @@ const Wishlistroutes = require("./routes/Wishlistroutes");
 const OrderRoutes = require("./routes/OrderRoutes");
 const TrackProductRoutes = require("./routes/TrackProduct");
 const notificationRoutes = require("./routes/notificationsRoutes");
-
+const startNotificationScheduler = require("./services/notificationScheduler");
 dotenv.config();
 
 const app = express();
@@ -41,9 +41,12 @@ app.use("/api/recommendations", require("./routes/Recommendationroutes"));
 // MongoDB connection
 mongoose
   .connect(process.env.MONGO_URI)
-  .then(() => console.log("✅ MongoDB connected"))
-  .catch((err) => console.log(err));
+  .then(() => {
+    console.log("✅ MongoDB connected");
 
+    startNotificationScheduler(); // ✅ start AFTER DB connection
+  })
+  .catch((err) => console.log(err));
 // Global error handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
