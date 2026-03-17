@@ -81,7 +81,10 @@ router.post("/send-test", authMiddleware, async (req, res) => {
       sound: "default",
       title: "🔥 Myntra Clone",
       body: "Push notifications are working!",
-      data: { screen: "Home" },
+      data: {
+        screen: "product",
+        productId: "12345"
+      },
     };
 
     const response = await expo.sendPushNotificationsAsync([message]);

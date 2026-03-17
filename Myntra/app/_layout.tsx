@@ -34,6 +34,10 @@ Notifications.setNotificationHandler({
   }),
 });
 
+type NotificationData = {
+  screen?: string;
+  productId?: string;
+};
 export default function RootLayout() {
   const colorScheme = useColorScheme();
 
@@ -102,11 +106,46 @@ function RootLayoutNav() {
 
     setupNotifications();
   }, [authToken]);
+  const handleNavigation = (data: NotificationData) => {
+    if (!data || typeof data !== "object") return;
 
+    if (data.screen === "orders") {
+      router.push("/orders");
+    }
+
+    if (data.screen === "home") {
+      router.push("/");
+    }
+
+    if (data.screen === "product" && data.productId) {
+      router.push(`/product/${data.productId}`);
+    }
+  };
   /*
   Notification Listeners
   */
   useEffect(() => {
+
+    let handled = false;
+
+    const checkInitialNotification = async () => {
+      const response = await Notifications.getLastNotificationResponseAsync();
+
+      if (response && !handled) {
+        handled = true;
+
+        const data = response.notification.request.content.data as NotificationData;
+
+        console.log("App opened from killed state:", data);
+
+        setTimeout(() => {
+          handleNavigation(data);
+        }, 500);
+      }
+    };
+
+    checkInitialNotification();
+
     // Foreground notification
     const notificationListener =
       Notifications.addNotificationReceivedListener((notification) => {
@@ -116,24 +155,20 @@ function RootLayoutNav() {
     // When user taps notification
     const responseListener =
       Notifications.addNotificationResponseReceivedListener((response) => {
-        const data = response.notification.request.content.data;
+        const data = response.notification.request.content.data as NotificationData;
 
         console.log("Notification tapped:", data);
 
-        if (data?.screen === "orders") {
-          router.push("/orders");
-        }
-
-        if (data?.screen === "home") {
-          router.push("/");
-        }
+        handleNavigation(data);
       });
 
     return () => {
       notificationListener.remove();
       responseListener.remove();
     };
+
   }, [router]);
+
 
   return (
     <>
