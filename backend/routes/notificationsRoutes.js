@@ -4,7 +4,7 @@ const { Expo } = require("expo-server-sdk");
 const expo = new Expo();
 const DeviceToken = require("../models/DeviceToken");
 const authMiddleware = require("../middleware/authMiddleware");
-
+const Notification = require("../models/Notification");
 /*
 REGISTER DEVICE TOKEN
 */
@@ -59,7 +59,6 @@ Sends a test notification to the logged-in user's device
 */
 router.post("/send-test", authMiddleware, async (req, res) => {
   try {
-
     const devices = await DeviceToken.find({ userId: req.user._id });
 
     if (!devices || devices.length === 0) {
@@ -69,25 +68,30 @@ router.post("/send-test", authMiddleware, async (req, res) => {
       });
     }
 
-    if (!Expo.isExpoPushToken(device.token)) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid Expo push token",
-      });
-    }
+    // Create messages for ALL devices
+    const messages = devices
+      .filter(device => Expo.isExpoPushToken(device.token))
+      .map(device => ({
+        to: device.token,
+        sound: "default",
+        title: "🔥 Myntra Clone",
+        body: "Push notifications are working!",
+        data: {
+          screen: "product",
+          productId: "12345",
+        },
+      }));
 
-    const message = {
-      to: device.token,
-      sound: "default",
+    // Send notifications
+    const response = await expo.sendPushNotificationsAsync(messages);
+
+    // Save notification in DB
+    await Notification.create({
+      userId: req.user._id,
       title: "🔥 Myntra Clone",
       body: "Push notifications are working!",
-      data: {
-        screen: "product",
-        productId: "12345"
-      },
-    };
-
-    const response = await expo.sendPushNotificationsAsync([message]);
+      type: "test",
+    });
 
     res.json({
       success: true,
@@ -102,6 +106,16 @@ router.post("/send-test", authMiddleware, async (req, res) => {
       message: "Failed to send notification",
     });
   }
+});
+router.get("/my-notifications", authMiddleware, async (req, res) => {
+  const notifications = await Notification.find({
+    userId: req.user._id,
+  }).sort({ createdAt: -1 });
+
+  res.json({
+    success: true,
+    notifications,
+  });
 });
 router.delete("/remove-device", authMiddleware, async (req, res) => {
   try {

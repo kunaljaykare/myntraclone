@@ -3,7 +3,6 @@ const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const cors = require("cors");
 const morgan = require("morgan");
-require("./utils/cronJobs"); 
 const userrouter = require("./routes/Userroutes");
 const categoryrouter = require("./routes/Categoryroutes");
 const productrouter = require("./routes/Productroutes");
