@@ -17,7 +17,7 @@ const Bagroutes = require("./routes/Bagroutes");
 const Wishlistroutes = require("./routes/Wishlistroutes");
 const OrderRoutes = require("./routes/OrderRoutes");
 const TrackProductRoutes = require("./routes/TrackProduct");
-const notificationRoutes = require("./routes/notificationsRoutes");
+const notificationRoutes = require("./routes/notificationRoutes");
 const startNotificationScheduler = require("./services/notificationScheduler");
 dotenv.config();
 
