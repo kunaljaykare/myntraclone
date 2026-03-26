@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "202d869f-6c64-4c8a-b326-2b719a009e79"
+      }
+    },
+    "android": {
+      "package": "com.kunaljaykare.myntraclone"
+    }
+  }
+}
