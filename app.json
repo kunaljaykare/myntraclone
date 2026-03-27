@@ -7,6 +7,12 @@
     },
     "android": {
       "package": "com.kunaljaykare.myntraclone"
+    },
+    "ios": {
+      "bundleIdentifier": "com.kunaljaykare.myntraclone",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     }
   }
 }
