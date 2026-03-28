@@ -4,7 +4,7 @@
     "slug": "myntraclone",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/myntra.jpg",
+    "icon": "./assets/images/Mytra-fav.png",
     "scheme": "myntraclone",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -14,7 +14,7 @@
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/myntra.jpg"
+        "foregroundImage": "./assets/images/Mytra-fav.png"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
@@ -29,7 +29,7 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/myntra.jpg",
+          "image": "./assets/images/Mytra-fav.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff",
