@@ -43,6 +43,8 @@ app.use("/api/orders", OrderRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/track-product", TrackProductRoutes);
 app.use("/api/recommendations", require("./routes/Recommendationroutes"));
+
+
 console.log("🔌 Connecting to MongoDB...");
 // MongoDB connection
 mongoose.connect(process.env.MONGO_URI)
