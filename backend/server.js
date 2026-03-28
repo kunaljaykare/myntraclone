@@ -17,7 +17,7 @@ const Bagroutes = require("./routes/Bagroutes");
 const Wishlistroutes = require("./routes/Wishlistroutes");
 const OrderRoutes = require("./routes/OrderRoutes");
 const TrackProductRoutes = require("./routes/TrackProduct");
-const notificationRoutes = require("./routes/notificationRoutes");
+const notificationRoutes = require("./routes/notificationsRoutes");
 const startNotificationScheduler = require("./services/notificationScheduler");
 dotenv.config();
 
@@ -27,7 +27,10 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 app.use(morgan("dev"));
-
+app.use((req, res, next) => {
+  console.log("➡️ Incoming:", req.method, req.url);
+  next();
+});
 // Test route
 app.get("/", (req, res) => {
   res.send("✅ Myntra backend is working");

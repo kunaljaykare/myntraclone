@@ -37,35 +37,34 @@ router.post("/signup", async (req, res) => {
 
 // ✅ LOGIN (WITH JWT)
 router.post("/login", async (req, res) => {
-  const { email, password } = req.body;
+  console.log("BODY:", req.body);
 
   try {
+    const { email, password } = req.body;
+
     const user = await User.findOne({ email });
+    console.log("USER:", user);
 
     if (!user)
       return res.status(404).json({ message: "User not found" });
 
     const ismatch = await bcrypt.compare(password, user.password);
+    console.log("MATCH:", ismatch);
 
     if (!ismatch)
       return res.status(401).json({ message: "Invalid password" });
 
+    console.log("JWT SECRET:", process.env.JWT_SECRET);
+
     const token = jwt.sign(
       { id: user._id },
-      process.env.JWT_SECRET,
-      { expiresIn: "7d" }
+      process.env.JWT_SECRET
     );
 
-    const { password: _, ...userData } = user.toObject();
-
-    res.status(200).json({
-      success: true,
-      user: userData,
-      token,
-    });
+    res.json({ success: true, token });
 
   } catch (error) {
-    console.log(error);
+    console.log("ERROR:", error);
     res.status(500).json({ message: "Something went wrong" });
   }
 });
