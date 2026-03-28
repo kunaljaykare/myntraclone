@@ -100,7 +100,7 @@ export default function ProductDetails() {
     setRecLoading(true);
 
     axios.get(
-      `https://myntraclone-7ekz.onrender.com/api/recommendations/${id}`,
+      `https://myntraclone-7ekz.onrender.com/recommendations/${id}`,
       {
         params: { userId: user?._id },
         signal: controller.signal,
@@ -149,7 +149,7 @@ export default function ProductDetails() {
     trackedRef.current = `${user._id}_${product._id}`;
 
     axios.post(
-      "https://myntraclone-7ekz.onrender.com/api/track-product/view",
+      "https://myntraclone-7ekz.onrender.com/track-product/view",
       {
         userId: user?._id,
         productId: product._id,
@@ -392,7 +392,7 @@ export default function ProductDetails() {
                 item={item}
                 onPress={() => {
                   axios.post(
-                    "https://myntraclone-7ekz.onrender.com/api/track-product/view",
+                    "https://myntraclone-7ekz.onrender.com/track-product/view",
                     {
                       userId: user?._id,
                       productId: item._id,

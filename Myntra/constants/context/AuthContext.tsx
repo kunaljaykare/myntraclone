@@ -59,7 +59,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if (!expoPushToken) return;
 
         await axios.post(
-          "https://myntraclone-7ekz.onrender.com/api/notifications/register-device",
+          "https://myntraclone-7ekz.onrender.com/notifications/register-device",
           {
             token: expoPushToken,
             deviceType: "android",

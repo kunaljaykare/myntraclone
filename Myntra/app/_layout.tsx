@@ -86,7 +86,7 @@ function RootLayoutNav() {
 
       try {
         await axios.post(
-          "https://myntraclone-7ekz.onrender.com/api/notifications/register-device",
+          "https://myntraclone-7ekz.onrender.com/notifications/register-device",
           {
             token: expoToken,
             deviceType: "android",

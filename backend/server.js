@@ -43,9 +43,9 @@ app.use("/product", productrouter);
 app.use("/bag", Bagroutes);
 app.use("/wishlist", Wishlistroutes);
 app.use("/orders", OrderRoutes);
-app.use("/api/notifications", notificationRoutes);
-app.use("/api/track-product", TrackProductRoutes);
-app.use("/api/recommendations", require("./routes/Recommendationroutes"));
+app.use("/notifications", notificationRoutes);
+app.use("/track-product", TrackProductRoutes);
+app.use("/recommendations", require("./routes/Recommendationroutes"));
 
 
 console.log("🔌 Connecting to MongoDB...");
