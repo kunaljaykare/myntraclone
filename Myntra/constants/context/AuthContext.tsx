@@ -87,7 +87,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   */
   const login = async (email: string, password: string) => {
     const res = await axios.post(
-      "https://myntraclone-7ekz.onrender.com/api/user/login",
+      "https://myntraclone-7ekz.onrender.com/user/login",
       {
         email,
         password,
@@ -117,7 +117,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     password: string
   ) => {
     const res = await axios.post(
-      "https://myntraclone-7ekz.onrender.com/api/user/signup",
+      "https://myntraclone-7ekz.onrender.com/user/signup",
       {
         fullName,
         email,

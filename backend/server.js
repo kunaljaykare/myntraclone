@@ -37,12 +37,12 @@ app.get("/", (req, res) => {
 });
 
 // API Routes
-app.use("/api/user", userrouter);
-app.use("/api/category", categoryrouter);
-app.use("/api/product", productrouter);
-app.use("/api/bag", Bagroutes);
-app.use("/api/wishlist", Wishlistroutes);
-app.use("/api/orders", OrderRoutes);
+app.use("/user", userrouter);
+app.use("/category", categoryrouter);
+app.use("/product", productrouter);
+app.use("/bag", Bagroutes);
+app.use("/wishlist", Wishlistroutes);
+app.use("/orders", OrderRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/track-product", TrackProductRoutes);
 app.use("/api/recommendations", require("./routes/Recommendationroutes"));
