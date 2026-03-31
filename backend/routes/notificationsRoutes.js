@@ -59,8 +59,9 @@ Sends a test notification to the logged-in user's device
 */
 router.post("/send-test", authMiddleware, async (req, res) => {
   try {
+    console.log("User:",req.user);
     const devices = await DeviceToken.find({ userId: req.user._id });
-
+    console.log("Devices:", devices);
     if (!devices || devices.length === 0) {
       return res.status(404).json({
         success: false,
@@ -100,10 +101,10 @@ router.post("/send-test", authMiddleware, async (req, res) => {
     });
 
   } catch (error) {
-    console.error(error);
+    console.error("Full Error:", error);
     res.status(500).json({
       success: false,
-      message: "Failed to send notification",
+      message: error.message,
     });
   }
 });

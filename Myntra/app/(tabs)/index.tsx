@@ -1,5 +1,6 @@
 import { useAuth } from "@/constants/context/AuthContext";
 import axios from "axios";
+import { useTheme } from "@/hooks/useTheme";
 import { useRouter } from "expo-router";
 import { ChevronRight, Search } from "lucide-react-native";
 import React, { useEffect, useState } from "react";
@@ -37,6 +38,7 @@ export default function Home() {
   const [product, setproduct] = useState<any>(null);
   const [categories, setcategories] = useState<any>(null);
   const { user } = useAuth();
+  const { theme } = useTheme();
   const handleProductPress = (productId: number) => {
     if (!user) {
       router.push("/login");
