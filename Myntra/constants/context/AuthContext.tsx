@@ -47,51 +47,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   /*
-  Register push notifications after login
-  */
-  useEffect(() => {
-    if (!user || !authToken || tokenRegistered.current) return;
-
-    const setupNotifications = async () => {
-      try {
-        const expoPushToken = await registerForPushNotificationsAsync();
-
-        if (!expoPushToken) return;
-
-        await axios.post(
-          "https://myntraclone-7ekz.onrender.com/notifications/register-device",
-          {
-            token: expoPushToken,
-            deviceType: "android",
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${authToken}`,
-            },
-          }
-        );
-
-        tokenRegistered.current = true;
-
-        console.log("Push token registered successfully");
-      } catch (error) {
-        console.error("Notification setup failed:", error);
-      }
-    };
-
-    setupNotifications();
-  }, [user, authToken]);
-
-  /*
   LOGIN
   */
   const login = async (email: string, password: string) => {
     const res = await axios.post(
       "https://myntraclone-7ekz.onrender.com/user/login",
-      {
-        email,
-        password,
-      }
+      { email, password }
     );
 
     const { user, token } = res.data;
@@ -106,6 +67,30 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     setAuthToken(token);
     setIsAuthenticated(true);
+
+    // ✅ REGISTER DEVICE TOKEN IMMEDIATELY
+    try {
+      const expoPushToken = await registerForPushNotificationsAsync();
+
+      if (expoPushToken) {
+        await axios.post(
+          "https://myntraclone-7ekz.onrender.com/notifications/register-device",
+          {
+            token: expoPushToken,
+            deviceType: "android",
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        console.log("Device registered after login ✅");
+      }
+    } catch (err) {
+      console.error("Device registration failed:", err);
+    }
   };
 
   /*
