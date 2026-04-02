@@ -23,9 +23,17 @@ export default function Login() {
   const handleLogin = async () => {
   try {
     setisloading(true);
-    await login(email, password);
-  } catch {
-    alert("Login failed");
+
+    console.log("Starting login...");
+
+    await login(email, password); // ⭐ IMPORTANT
+
+    console.log("LOGIN SUCCESS");
+
+    router.replace("/(tabs)"); // go to home
+
+  } catch (error: any) {
+    console.log("LOGIN ERROR:", error?.message);
   } finally {
     setisloading(false);
   }
