@@ -29,13 +29,19 @@ const menuItems = [
 
 export default function Profile() {
   const router = useRouter();
-  const { user, logout } = useAuth();
-  const handleLogout = () => {
-    logout()
-    router.replace("/");
+  const { user, logout, isAuthenticated, authLoading } = useAuth();
+  const handleLogout = async () => {
+    await logout();
+    router.replace("/login");
   };
-
-  if (!user) {
+  if (authLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <Text>Loading...</Text>
+      </View>
+    );
+  }
+  if (!isAuthenticated || !user) {
     return (
       <View style={styles.container}>
         <View style={styles.header}>

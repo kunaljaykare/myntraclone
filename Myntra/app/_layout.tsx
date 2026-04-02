@@ -69,95 +69,76 @@ AuthProvider is now mounted so useAuth() works correctly
 */
 function RootLayoutNav() {
   const router = useRouter();
-  const { authToken } = useAuth();
+  const { isAuthenticated, authLoading, authToken } = useAuth();
 
   /*
   Register push notifications after login
   */
   useEffect(() => {
-    if (!authToken) return;
+  if (!authToken) return;
 
-    async function setupNotifications() {
-      const expoToken = await registerForPushNotificationsAsync();
+  async function setupNotifications() {
+    const expoToken = await registerForPushNotificationsAsync();
 
-      if (!expoToken) return;
+    if (!expoToken) return;
 
-      console.log("Expo Push Token:", expoToken);
-
-      try {
-        await axios.post(
-          "https://myntraclone-7ekz.onrender.com/notifications/register-device",
-          {
-            token: expoToken,
-            deviceType: "android",
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${authToken}`,
-            },
-          }
-        );
-
-        console.log("Device token saved to backend");
-      } catch (error) {
-        console.log("Failed to register device:", error);
+    await axios.post(
+      "https://myntraclone-7ekz.onrender.com/notifications/register-device",
+      {
+        token: expoToken,
+        deviceType: "android",
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
       }
-    }
+    );
 
-    setupNotifications();
-  }, [authToken]);
+    console.log("Device token saved ✅");
+  }
+
+  setupNotifications();
+}, [authToken]);
+
   const handleNavigation = (data: NotificationData) => {
-    if (!data || typeof data !== "object") return;
+    if (!data) return;
 
-    if (data.screen === "orders") {
-      router.push("/orders");
-    }
-
-    if (data.screen === "home") {
-      router.push("/");
-    }
-
-    if (data.screen === "product" && data.productId) {
+    if (data.screen === "orders") router.push("/orders");
+    if (data.screen === "home") router.push("/");
+    if (data.screen === "product" && data.productId)
       router.push(`/product/${data.productId}`);
-    }
   };
+
   /*
   Notification Listeners
   */
   useEffect(() => {
-
     let handled = false;
 
     const checkInitialNotification = async () => {
-      const response = await Notifications.getLastNotificationResponseAsync();
+      const response =
+        await Notifications.getLastNotificationResponseAsync();
 
       if (response && !handled) {
         handled = true;
 
-        const data = response.notification.request.content.data as NotificationData;
+        const data =
+          response.notification.request.content.data as NotificationData;
 
-        console.log("App opened from killed state:", data);
-
-        setTimeout(() => {
-          handleNavigation(data);
-        }, 500);
+        setTimeout(() => handleNavigation(data), 500);
       }
     };
 
     checkInitialNotification();
 
-    // Foreground notification
     const notificationListener =
-      Notifications.addNotificationReceivedListener((notification) => {
-        console.log("Notification received:", notification);
-      });
+      Notifications.addNotificationReceivedListener(() => { });
 
-    // When user taps notification
     const responseListener =
       Notifications.addNotificationResponseReceivedListener((response) => {
-        const data = response.notification.request.content.data as NotificationData;
-
-        console.log("Notification tapped:", data);
+        const data =
+          response.notification.request.content.data as NotificationData;
 
         handleNavigation(data);
       });
@@ -166,22 +147,24 @@ function RootLayoutNav() {
       notificationListener.remove();
       responseListener.remove();
     };
+  }, []);
 
-  }, [router]);
-
+  if (authLoading) return null;
 
   return (
     <>
       <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="(auth)" />
+        {isAuthenticated ? (
+          <Stack.Screen name="(tabs)" />
+        ) : (
+          <Stack.Screen name="(auth)" />
+        )}
       </Stack>
 
       <StatusBar style="auto" />
     </>
   );
 }
-
 /*
 Expo Router Setting
 */

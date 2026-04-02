@@ -21,19 +21,15 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [isloading, setisloading] = useState(false);
   const handleLogin = async () => {
-    try {
-      setisloading(true);   // ✅ START LOADING
-
-      await login(email, password);
-
-      router.replace("/(tabs)");
-    } catch (error) {
-      console.log("LOGIN ERROR:", error);
-      alert("Login failed");
-    } finally {
-      setisloading(false);
-    }
-  };
+  try {
+    setisloading(true);
+    await login(email, password);
+  } catch {
+    alert("Login failed");
+  } finally {
+    setisloading(false);
+  }
+};
 
   return (
     <View style={styles.container}>

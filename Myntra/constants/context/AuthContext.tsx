@@ -5,6 +5,7 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 
 type AuthContextType = {
   isAuthenticated: boolean;
+  authLoading: boolean;
   user: { _id: string; name: string; email: string } | null;
   authToken: string | null;
   Signup: (fullName: string, email: string, password: string) => Promise<void>;
@@ -19,7 +20,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authToken, setAuthToken] = useState<string | null>(null);
-
+  const [authLoading, setAuthLoading] = useState(true);
   const [user, setUser] = useState<{
     _id: string;
     name: string;
@@ -31,17 +32,23 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   */
   useEffect(() => {
     (async () => {
-      const data = await getUserData();
+      try {
+        const data = await getUserData();
 
-      if (data._id && data.name && data.email && data.token) {
-        setUser({
-          _id: data._id,
-          name: data.name,
-          email: data.email,
-        });
+        if (data?.token && data._id && data.name && data.email) {
+          setUser({
+            _id: data._id,
+            name: data.name,
+            email: data.email,
+          });
 
-        setAuthToken(data.token);
-        setIsAuthenticated(true);
+          setAuthToken(data.token);
+          setIsAuthenticated(true);
+        }
+      } catch (err) {
+        console.log("Storage load error", err);
+      } finally {
+        setAuthLoading(false); // ⭐ IMPORTANT
       }
     })();
   }, []);
@@ -75,27 +82,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setIsAuthenticated(true);
 
       console.log("AUTH SUCCESS ✅");
-
-      registerForPushNotificationsAsync()
-        .then(async (expoPushToken) => {
-          if (!expoPushToken) return;
-
-          await axios.post(
-            "https://myntraclone-7ekz.onrender.com/notifications/register-device",
-            {
-              token: expoPushToken,
-              deviceType: "android",
-            },
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          );
-
-          console.log("Device registered ✅");
-        })
-        .catch((err) => console.log("Push setup error:", err));
 
     } catch (error: any) {
       console.log(
@@ -153,6 +139,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     <AuthContext.Provider
       value={{
         isAuthenticated,
+        authLoading,
         user,
         authToken,
         Signup,
