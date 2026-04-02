@@ -47,49 +47,63 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   /*
-  LOGIN
-  */
+ LOGIN
+ */
   const login = async (email: string, password: string) => {
-    const res = await axios.post(
-      "https://myntraclone-7ekz.onrender.com/user/login",
-      { email, password }
-    );
-
-    const { user, token } = res.data;
-
-    await saveUserData(user._id, user.fullName, user.email, token);
-
-    setUser({
-      _id: user._id,
-      name: user.fullName,
-      email: user.email,
-    });
-
-    setAuthToken(token);
-    setIsAuthenticated(true);
-
-    // ✅ REGISTER DEVICE TOKEN IMMEDIATELY
     try {
-      const expoPushToken = await registerForPushNotificationsAsync();
+      console.log("LOGIN START");
 
-      if (expoPushToken) {
-        await axios.post(
-          "https://myntraclone-7ekz.onrender.com/notifications/register-device",
-          {
-            token: expoPushToken,
-            deviceType: "android",
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
+      const res = await axios.post(
+        "https://myntraclone-7ekz.onrender.com/user/login",
+        { email, password },
+        { timeout: 60000 }
+      );
+
+      console.log("LOGIN RESPONSE:", res.data);
+
+      const { user, token } = res.data;
+
+      await saveUserData(user._id, user.fullName, user.email, token);
+
+      setUser({
+        _id: user._id,
+        name: user.fullName,
+        email: user.email,
+      });
+
+      setAuthToken(token);
+      setIsAuthenticated(true);
+
+      console.log("AUTH SUCCESS ✅");
+
+      registerForPushNotificationsAsync()
+        .then(async (expoPushToken) => {
+          if (!expoPushToken) return;
+
+          await axios.post(
+            "https://myntraclone-7ekz.onrender.com/notifications/register-device",
+            {
+              token: expoPushToken,
+              deviceType: "android",
             },
-          }
-        );
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
 
-        console.log("Device registered after login ✅");
-      }
-    } catch (err) {
-      console.error("Device registration failed:", err);
+          console.log("Device registered ✅");
+        })
+        .catch((err) => console.log("Push setup error:", err));
+
+    } catch (error: any) {
+      console.log(
+        "LOGIN ERROR 👉",
+        error?.response?.data || error.message
+      );
+
+      throw error;
     }
   };
 

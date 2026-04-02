@@ -22,11 +22,14 @@ export default function Login() {
   const [isloading, setisloading] = useState(false);
   const handleLogin = async () => {
     try {
-      setisloading(true);
+      setisloading(true);   // ✅ START LOADING
+
       await login(email, password);
+
       router.replace("/(tabs)");
     } catch (error) {
-      console.error(error);
+      console.log("LOGIN ERROR:", error);
+      alert("Login failed");
     } finally {
       setisloading(false);
     }
