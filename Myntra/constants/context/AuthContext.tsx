@@ -9,7 +9,7 @@ type AuthContextType = {
   user: { _id: string; name: string; email: string } | null;
   authToken: string | null;
   Signup: (fullName: string, email: string, password: string) => Promise<void>;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
 };
 
@@ -56,7 +56,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   /*
  LOGIN
  */
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string): Promise<boolean> => {
     try {
       console.log("LOGIN START");
 
@@ -65,8 +65,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         { email, password },
         { timeout: 60000 }
       );
-
-      console.log("LOGIN RESPONSE:", res.data);
 
       const { user, token } = res.data;
 
@@ -83,13 +81,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       console.log("AUTH SUCCESS ✅");
 
+      return true; // ⭐ IMPORTANT
     } catch (error: any) {
       console.log(
         "LOGIN ERROR 👉",
         error?.response?.data || error.message
       );
 
-      throw error;
+      return false; // ⭐ IMPORTANT
     }
   };
 

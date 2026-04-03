@@ -21,15 +21,16 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [isloading, setisloading] = useState(false);
   const handleLogin = async () => {
-    try {
-      setisloading(true);
+    if (isloading) return;
 
-      await login(email, password);
+    setisloading(true);
 
-    } catch (error) {
-      console.log("LOGIN FAILED ❌", error);
-    } finally {
-      setisloading(false);
+    const success = await login(email, password);
+
+    setisloading(false);
+
+    if (!success) {
+      alert("Invalid credentials");
     }
   };
 

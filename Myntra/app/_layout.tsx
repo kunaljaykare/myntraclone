@@ -75,31 +75,31 @@ function RootLayoutNav() {
   Register push notifications after login
   */
   useEffect(() => {
-  if (!authToken) return;
+    if (!authToken) return;
 
-  async function setupNotifications() {
-    const expoToken = await registerForPushNotificationsAsync();
+    async function setupNotifications() {
+      const expoToken = await registerForPushNotificationsAsync();
 
-    if (!expoToken) return;
+      if (!expoToken) return;
 
-    await axios.post(
-      "https://myntraclone-7ekz.onrender.com/notifications/register-device",
-      {
-        token: expoToken,
-        deviceType: "android",
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${authToken}`,
+      await axios.post(
+        "https://myntraclone-7ekz.onrender.com/notifications/register-device",
+        {
+          token: expoToken,
+          deviceType: "android",
         },
-      }
-    );
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        }
+      );
 
-    console.log("Device token saved ✅");
-  }
+      console.log("Device token saved ✅");
+    }
 
-  setupNotifications();
-}, [authToken]);
+    setupNotifications();
+  }, [authToken]);
 
   const handleNavigation = (data: NotificationData) => {
     if (!data) return;
