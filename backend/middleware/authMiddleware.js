@@ -12,11 +12,21 @@ module.exports = async (req, res, next) => {
       });
     }
 
-    const token = authHeader.split(" ")[1];
+    // ✅ Accept both "Bearer TOKEN" and "TOKEN"
+    const token = authHeader.startsWith("Bearer ")
+      ? authHeader.split(" ")[1]
+      : authHeader;
+
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        message: "Token missing",
+      });
+    }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    const user = await User.findById(decoded.id);
+    const user = await User.findById(decoded.id).select("-password");
 
     if (!user) {
       return res.status(401).json({
@@ -28,9 +38,9 @@ module.exports = async (req, res, next) => {
     req.user = user;
 
     next();
-
   } catch (error) {
-    console.error("Auth Error:", error);
+    console.error("Auth Error:", error.message);
+
     res.status(401).json({
       success: false,
       message: "Invalid token",
