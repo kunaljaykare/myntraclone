@@ -1,5 +1,3 @@
-import { model } from "mongoose";
-
 export const LightTheme = {
     model: "light",
     colors : {
