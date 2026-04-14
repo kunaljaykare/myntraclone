@@ -2,70 +2,77 @@ const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
+const authMiddleware = require("../middleware/auth");
 
 const router = express.Router();
 
-//SIGNUP
+// ================= SIGNUP =================
 router.post("/signup", async (req, res) => {
-  const { fullName, email, password } = req.body;
-
   try {
-    const existinguser = await User.findOne({ email });
+    const { fullName, email, password } = req.body;
 
-    if (existinguser)
+    // Basic validation check
+    if (!email || !password) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    const existing = await User.findOne({ email });
+    if (existing) {
       return res.status(400).json({ message: "User already exists" });
+    }
 
-    const hashedpassword = await bcrypt.hash(password, 10);
+    const hashed = await bcrypt.hash(password, 10);
 
-    const user = new User({
+    await User.create({
       fullName,
       email,
-      password: hashedpassword,
+      password: hashed,
     });
 
-    await user.save();
-
-    const { password: _, ...userData } = user.toObject();
-
-    res.status(201).json({ user: userData });
-
+    res.status(201).json({ success: true, message: "User created" });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Something went wrong" });
+    res.status(500).json({ message: "Server error during signup" });
   }
 });
 
-// ✅ LOGIN (WITH JWT)
+// ================= LOGIN =================
 router.post("/login", async (req, res) => {
-  console.log("BODY:", req.body);
-
   try {
     const { email, password } = req.body;
 
     const user = await User.findOne({ email });
-    console.log("USER:", user);
 
-    if (!user)
-      return res.status(404).json({ message: "User not found" });
+    // Generic error message for security
+    const authError = "Invalid email or password";
 
-    const ismatch = await bcrypt.compare(password, user.password);
-    console.log("MATCH:", ismatch);
+    if (!user) return res.status(401).json({ message: authError });
 
-    if (!ismatch)
-      return res.status(401).json({ message: "Invalid password" });
-
-    console.log("JWT SECRET:", process.env.JWT_SECRET);
+    const match = await bcrypt.compare(password, user.password);
+    if (!match) return res.status(401).json({ message: authError });
 
     const token = jwt.sign(
       { id: user._id },
-      process.env.JWT_SECRET
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
     );
 
     res.json({ success: true, token });
-
   } catch (error) {
-    console.log("ERROR:", error);
-    res.status(500).json({ message: "Something went wrong" });
+    res.status(500).json({ message: "Server error during login" });
+  }
+});
+
+// ================= PROFILE =================
+router.get("/profile", authMiddleware, async (req, res) => {
+  try {
+    // Assuming authMiddleware attaches the user to req.user
+    // and you've already stripped the password there.
+    res.json({
+      success: true,
+      user: req.user,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Could not fetch profile" });
   }
 });
 

@@ -56,19 +56,37 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   /*
  LOGIN
  */
-  const login = async (email: string, password: string): Promise<boolean> => {
+  const login = async (email: string, password: string) => {
     try {
       console.log("LOGIN START");
 
       const res = await axios.post(
         "https://myntraclone-7ekz.onrender.com/user/login",
-        { email, password },
-        { timeout: 10000 }
+        { email, password }
       );
 
-      const { user, token } = res.data;
+      const token = res.data.token;
 
-      await saveUserData(user._id, user.fullName, user.email, token);
+      if (!token) return false;
+
+      // ✅ fetch user profile
+      const profile = await axios.get(
+        "https://myntraclone-7ekz.onrender.com/user/profile",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const user = profile.data.user;
+
+      await saveUserData(
+        user._id,
+        user.fullName,
+        user.email,
+        token
+      );
 
       setUser({
         _id: user._id,
@@ -81,17 +99,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       console.log("AUTH SUCCESS ✅");
 
-      return true; // ⭐ IMPORTANT
+      return true;
     } catch (error: any) {
-      console.log(
-        "LOGIN ERROR 👉",
-        error?.response?.data || error.message
-      );
-
-      return false; // ⭐ IMPORTANT
+      console.log("LOGIN ERROR 👉", error.response?.data);
+      return false;
     }
   };
-
   /*
   SIGNUP
   */

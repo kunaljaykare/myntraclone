@@ -1,7 +1,7 @@
 import {
-  DarkTheme,
-  DefaultTheme,
-  ThemeProvider,
+  DarkTheme as NavigationDarkTheme,
+  DefaultTheme as NavigationLightTheme,
+  ThemeProvider as NavigationThemeProvider,
 } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import { Stack, useRouter } from "expo-router";
@@ -12,7 +12,7 @@ import "react-native-reanimated";
 import * as Notifications from "expo-notifications";
 import axios from "axios";
 import React from "react";
-
+import { ThemeProvider } from "../constants/context/ThemeContext";
 import { AuthProvider, useAuth } from "@/constants/context/AuthContext";
 import { registerForPushNotificationsAsync } from "@/utils/registerForPushNotifications";
 import { useColorScheme } from "@/hooks/useColorScheme";
@@ -39,30 +39,24 @@ type NotificationData = {
   productId?: string;
 };
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
-
   const [loaded] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
   });
 
-  // Hide splash screen
   useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
+    if (loaded) SplashScreen.hideAsync();
   }, [loaded]);
 
   if (!loaded) return null;
 
   return (
     <AuthProvider>
-      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+      <ThemeProvider>
         <RootLayoutNav />
       </ThemeProvider>
     </AuthProvider>
   );
 }
-
 /*
 Main Navigation Layout
 AuthProvider is now mounted so useAuth() works correctly

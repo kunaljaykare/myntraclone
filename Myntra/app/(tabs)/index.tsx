@@ -38,7 +38,9 @@ export default function Home() {
   const [product, setproduct] = useState<any>(null);
   const [categories, setcategories] = useState<any>(null);
   const { user } = useAuth();
-  const { theme } = useTheme();
+  const themeContext = useTheme();
+  if (!themeContext) return null;
+  const { theme } = themeContext;
   const handleProductPress = (productId: number) => {
     if (!user) {
       router.push("/login");
