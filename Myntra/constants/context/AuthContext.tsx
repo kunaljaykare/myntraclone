@@ -63,7 +63,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const res = await axios.post(
         "https://myntraclone-7ekz.onrender.com/user/login",
         { email, password },
-        { timeout: 60000 }
+        { timeout: 10000 }
       );
 
       const { user, token } = res.data;

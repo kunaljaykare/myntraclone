@@ -17,7 +17,7 @@ import { useAuth } from "@/constants/context/AuthContext";
 export default function Signup() {
   const { Signup } = useAuth();
   const router = useRouter();
-  const [isloading, setisloading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -67,13 +67,13 @@ export default function Signup() {
     if (validateForm()) {
       // Here you would typically make an API call to register the user
       try {
-        setisloading(true);
+        setIsLoading(true);
         await Signup(formData.fullName, formData.email, formData.password);
         router.replace("/(tabs)");
       } catch (error) {
         console.error(error);
       } finally {
-        setisloading(false);
+        setIsLoading(false);
       }
       router.replace("/(tabs)");
     }
@@ -159,9 +159,9 @@ export default function Signup() {
         <TouchableOpacity
           style={styles.button}
           onPress={handleSignup}
-          disabled={isloading}
+          disabled={isLoading}
         >
-          {isloading ? (
+          {isLoading ? (
             <ActivityIndicator color="#fff" />
           ) : (
             <Text style={styles.buttonText}>SIGN UP</Text>

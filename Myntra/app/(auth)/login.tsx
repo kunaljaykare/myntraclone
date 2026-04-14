@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { use, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -14,25 +14,32 @@ import { Eye, EyeOff } from "lucide-react-native";
 import { useAuth } from "@/constants/context/AuthContext";
 
 export default function Login() {
-  const { login } = useAuth();
+  const { isAuthenticated, login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
-  const [isloading, setisloading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const handleLogin = async () => {
-    if (isloading) return;
+    if (isLoading) return;
 
-    setisloading(true);
+    setIsLoading(true);
 
     const success = await login(email, password);
 
-    setisloading(false);
+    setIsLoading(false);
 
     if (!success) {
-      alert("Invalid credentials");
+      router.replace("/");
+    } else {
+      alert("Invalid credentials. Please try again.");
     }
   };
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.replace("/(tabs)");
+    }
+  }, [isAuthenticated]);
 
   return (
     <View style={styles.container}>
@@ -75,9 +82,9 @@ export default function Login() {
         <TouchableOpacity
           style={styles.button}
           onPress={handleLogin}
-          disabled={isloading}
+          disabled={isLoading}
         >
-          {isloading ? (
+          {isLoading ? (
             <ActivityIndicator color="#fff" />
           ) : (
             <Text style={styles.buttonText}>LOGIN</Text>
