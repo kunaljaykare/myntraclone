@@ -1,4 +1,4 @@
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -29,9 +29,9 @@ export default function Login() {
 
     setIsLoading(false);
 
-    if (!success) {
-      router.replace("/");
-    } else {
+    if (success) {
+      router.replace("/(tabs)");
+    }else {
       alert("Invalid credentials. Please try again.");
     }
   };

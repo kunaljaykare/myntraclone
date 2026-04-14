@@ -152,7 +152,7 @@ function RootLayoutNav() {
   if (authLoading) return null;
 
   return (
-    <>
+    <AuthProvider>
       <Stack screenOptions={{ headerShown: false }}>
         {isAuthenticated ? (
           <Stack.Screen name="(tabs)" />
@@ -162,7 +162,7 @@ function RootLayoutNav() {
       </Stack>
 
       <StatusBar style="auto" />
-    </>
+    </AuthProvider>
   );
 }
 /*
