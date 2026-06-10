@@ -63,8 +63,8 @@ AuthProvider is now mounted so useAuth() works correctly
 */
 function RootLayoutNav() {
   const router = useRouter();
-  const { isAuthenticated, authLoading, authToken } = useAuth();
-
+  
+const { isAuthenticated, authLoading, authToken } = useAuth();
   /*
   Register push notifications after login
   */
@@ -75,7 +75,7 @@ function RootLayoutNav() {
       const expoToken = await registerForPushNotificationsAsync();
 
       if (!expoToken) return;
-
+      try {
       await axios.post(
         "https://myntraclone-7ekz.onrender.com/notifications/register-device",
         {
@@ -90,7 +90,10 @@ function RootLayoutNav() {
       );
 
       console.log("Device token saved ✅");
+    } catch (error) {
+      console.error("Error saving device token:", error);
     }
+  }
 
     setupNotifications();
   }, [authToken]);

@@ -26,7 +26,11 @@ export default function Login() {
     setIsLoading(true);
 
     const success = await login(email, password);
-
+    if (!email.trim() || !password.trim()) {
+      alert("Please enter both email and password.");
+      setIsLoading(false);
+      return;
+    }
     setIsLoading(false);
 
     if (success) {
