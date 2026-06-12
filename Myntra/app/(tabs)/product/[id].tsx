@@ -26,7 +26,7 @@ const RecommendationCard = React.memo(
       onPress={onPress}
     >
       <Image
-        source={{ uri: item.images[0] }}
+        source={{ uri: item.images?.[0] }}
         style={styles.recommendationImage}
       />
       <Text numberOfLines={1} style={styles.recommendationName}>
@@ -69,7 +69,7 @@ export default function ProductDetails() {
       }
     };
     fetchproduct();
-  }, []);
+  }, [id]);
   useEffect(() => {
     const checkWishlist = async () => {
       if (!user || !id) return;
@@ -134,7 +134,7 @@ export default function ProductDetails() {
       addRecentlyViewed({
         _id: product._id,
         title: product.name,
-        image: product.images[0],
+        image: product.images[0] ?? "",
         price: product.price,
       });
     }

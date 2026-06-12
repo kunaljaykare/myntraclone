@@ -10,13 +10,12 @@ type AuthContextType = {
   authToken: string | null;
   Signup: (fullName: string, email: string, password: string) => Promise<void>;
   login: (email: string, password: string) => Promise<boolean>;
-  logout: () => void;
+  logout: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const tokenRegistered = React.useRef(false);
 
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authToken, setAuthToken] = useState<string | null>(null);
@@ -98,7 +97,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setIsAuthenticated(true);
 
       console.log("AUTH SUCCESS ✅");
+      const expoToken =
+        await registerForPushNotificationsAsync();
 
+      if (expoToken) {
+        await axios.post(
+          "https://myntraclone-7ekz.onrender.com/notifications/register-token",
+          {
+            userId: user._id,
+            token: expoToken,
+          }
+        );
+      }
       return true;
     } catch (error: any) {
       console.log("LOGIN ERROR 👉", error.response?.data);
@@ -134,12 +144,26 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     setAuthToken(token);
     setIsAuthenticated(true);
+    const expoToken =
+      await registerForPushNotificationsAsync();
+
+    if (expoToken) {
+      await axios.post(
+        "https://myntraclone-7ekz.onrender.com/notifications/register-token",
+        {
+          userId: user._id,
+          token: expoToken,
+        }
+      );
+    }
   };
 
   /*
   LOGOUT
   */
+
   const logout = async () => {
+
     await clearUserData();
 
     setUser(null);

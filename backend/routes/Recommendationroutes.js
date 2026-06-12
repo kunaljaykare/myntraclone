@@ -6,7 +6,7 @@ const Wishlist = require("../models/Wishlist");
 
 router.get("/:productId", async (req, res) => {
   try {
-    const userId = req.user?.id; // optional
+    const userId = req.user?.id || req.query.userId; // optional
     const currentProduct = await Product.findById(req.params.productId);
 
     if (!currentProduct) {

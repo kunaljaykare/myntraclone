@@ -59,7 +59,7 @@ Sends a test notification to the logged-in user's device
 */
 router.post("/send-test", authMiddleware, async (req, res) => {
   try {
-    console.log("User:",req.user);
+    console.log("User:", req.user);
     const devices = await DeviceToken.find({ userId: req.user._id });
     console.log("Devices:", devices);
     if (!devices || devices.length === 0) {

@@ -32,7 +32,6 @@ const deals = [
 
 export default function Home() {
   const router = useRouter();
-  //const [isLoading, setIsLoading] = useState(false);
   const [loadingCategories, setLoadingCategories] = useState(false);
   const [loadingProducts, setLoadingProducts] = useState(false);
   const [product, setproduct] = useState<any>(null);
@@ -55,7 +54,7 @@ export default function Home() {
         setLoadingProducts(true);
         const [catRes, productRes] = await Promise.all([
           axios.get("https://myntraclone-7ekz.onrender.com/category"),
-          axios.get("https://myntraclone-7ekz.onrender.com/product"),
+          axios.get("https://myntraclone-7ekz.onrender.com/product?limit=20"),
         ]);
 
         setcategories(catRes.data);

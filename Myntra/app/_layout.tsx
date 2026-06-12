@@ -16,7 +16,7 @@ import { ThemeProvider } from "../constants/context/ThemeContext";
 import { AuthProvider, useAuth } from "@/constants/context/AuthContext";
 import { registerForPushNotificationsAsync } from "@/utils/registerForPushNotifications";
 import { useColorScheme } from "@/hooks/useColorScheme";
-
+import { Platform } from "react-native";
 // Prevent splash screen auto hide
 SplashScreen.preventAutoHideAsync();
 
@@ -42,6 +42,46 @@ export default function RootLayout() {
   const [loaded] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
   });
+  useEffect(() => {
+    const receivedListener =
+      Notifications.addNotificationReceivedListener(
+        (notification) => {
+          console.log(
+            "Notification received:",
+            notification
+          );
+        }
+      );
+
+    return () => {
+      receivedListener.remove();
+    };
+  }, []);
+
+  const router = useRouter();
+
+  useEffect(() => {
+    const responseListener =
+      Notifications.addNotificationResponseReceivedListener(
+        (response) => {
+          console.log(
+            "Notification tapped:",
+            response
+          );
+
+          const data =
+            response.notification.request.content.data;
+
+          if (data?.productId) {
+            router.push(`/product/${data.productId}`);
+          }
+        }
+      );
+
+    return () => {
+      responseListener.remove();
+    };
+  }, []);
 
   useEffect(() => {
     if (loaded) SplashScreen.hideAsync();
@@ -63,8 +103,8 @@ AuthProvider is now mounted so useAuth() works correctly
 */
 function RootLayoutNav() {
   const router = useRouter();
-  
-const { isAuthenticated, authLoading, authToken } = useAuth();
+
+  const { isAuthenticated, authLoading, authToken } = useAuth();
   /*
   Register push notifications after login
   */
@@ -76,24 +116,24 @@ const { isAuthenticated, authLoading, authToken } = useAuth();
 
       if (!expoToken) return;
       try {
-      await axios.post(
-        "https://myntraclone-7ekz.onrender.com/notifications/register-device",
-        {
-          token: expoToken,
-          deviceType: "android",
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${authToken}`,
+        await axios.post(
+          "https://myntraclone-7ekz.onrender.com/notifications/register-device",
+          {
+            token: expoToken,
+            deviceType: Platform.OS,
           },
-        }
-      );
+          {
+            headers: {
+              Authorization: authToken,
+            },
+          }
+        );
 
-      console.log("Device token saved ✅");
-    } catch (error) {
-      console.error("Error saving device token:", error);
+        console.log("Device token saved ✅");
+      } catch (error) {
+        console.error("Error saving device token:", error);
+      }
     }
-  }
 
     setupNotifications();
   }, [authToken]);
@@ -129,9 +169,6 @@ const { isAuthenticated, authLoading, authToken } = useAuth();
 
     checkInitialNotification();
 
-    const notificationListener =
-      Notifications.addNotificationReceivedListener(() => { });
-
     const responseListener =
       Notifications.addNotificationResponseReceivedListener((response) => {
         const data =
@@ -141,7 +178,6 @@ const { isAuthenticated, authLoading, authToken } = useAuth();
       });
 
     return () => {
-      notificationListener.remove();
       responseListener.remove();
     };
   }, []);
