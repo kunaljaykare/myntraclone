@@ -12,7 +12,7 @@ import "react-native-reanimated";
 import * as Notifications from "expo-notifications";
 import axios from "axios";
 import React from "react";
-import { ThemeProvider } from "../constants/context/ThemeContext";
+import { ThemeProvider } from "@/theme/ThemeContext";
 import { AuthProvider, useAuth } from "@/constants/context/AuthContext";
 import { registerForPushNotificationsAsync } from "@/utils/registerForPushNotifications";
 import { useColorScheme } from "@/hooks/useColorScheme";
