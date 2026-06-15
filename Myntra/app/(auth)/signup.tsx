@@ -70,7 +70,7 @@ export default function Signup() {
       try {
         setIsLoading(true);
         await Signup(formData.fullName, formData.email, formData.password);
-        router.replace("/(tabs)");
+        router.replace("/login"); // Redirect to login after successful signup
       } catch (error) {
         Alert.alert("Signup Failed");
       } finally {

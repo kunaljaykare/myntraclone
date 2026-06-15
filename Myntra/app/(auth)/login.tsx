@@ -27,14 +27,16 @@ export default function Login() {
 
     if (!email.trim() || !password.trim()) {
       alert("Please enter both email and password.");
+      setIsLoading(false);
       return;
     }
     const success = await login(email, password);
 
     if (success) {
       router.replace("/(tabs)");
-    }else {
+    } else {
       alert("Invalid credentials. Please try again.");
+      setIsLoading(false);
     }
   };
   useEffect(() => {

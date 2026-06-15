@@ -112,7 +112,7 @@ function RootLayoutNav() {
     if (!authToken) return;
 
     async function setupNotifications() {
-      const expoToken = await registerForPushNotificationsAsync();
+      //const expoToken = await registerForPushNotificationsAsync();
 
       if (!expoToken) return;
       try {
