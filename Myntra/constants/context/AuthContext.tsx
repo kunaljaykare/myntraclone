@@ -132,6 +132,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
     );
 
+    console.log("SIGNUP RESPONSE:", res.data);
+
     const { user, token } = res.data;
 
     await saveUserData(user._id, user.fullName, user.email, token);
