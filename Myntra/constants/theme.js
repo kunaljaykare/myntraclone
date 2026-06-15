@@ -1,21 +1,17 @@
 export const LightTheme = {
-  mode: "light",
-  colors: {
-    background: "#FFFFFF",
-    text: "#000000",
-    primary: "#ff3f6c",
-    card: "#ffffff",
-    border: "#e0e0e0",
-  },
+  background: "#FFFFFF",
+  surface: "#F5F5F5",
+  text: "#111111",
+  secondaryText: "#666666",
+  primary: "#FF3F6C",
+  border: "#E5E5E5",
 };
 
 export const DarkTheme = {
-  mode: "dark",
-  colors: {
-    background: "#121212",
-    text: "#FFFFFF",
-    primary: "#ff3f6c",
-    card: "#1e1e1e",
-    border: "#333333",
-  },
+  background: "#121212",
+  surface: "#1E1E1E",
+  text: "#FFFFFF",
+  secondaryText: "#AAAAAA",
+  primary: "#FF3F6C",
+  border: "#333333",
 };

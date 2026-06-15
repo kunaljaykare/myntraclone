@@ -1,17 +1,19 @@
-import { Stack } from 'expo-router';
-import React from 'react';
-import { AuthProvider } from '@/constants/context/AuthContext';
+import React from "react";
+import { Stack } from "expo-router";
 
-export default function AuthLayout() {
+import { AuthProvider } from "@/constants/context/AuthContext";
+import { ThemeProvider } from "@/constants/context/ThemeContext";
+
+export default function RootLayout() {
   return (
-    <AuthProvider>
-      <Stack
-        screenOptions={{
-          headerStyle: { backgroundColor: '#fff' },
-          headerTintColor: '#333',
-          headerTitleStyle: { fontWeight: 'bold' },
-        }}
-      />
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <Stack
+          screenOptions={{
+            headerShown: false,
+          }}
+        />
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
