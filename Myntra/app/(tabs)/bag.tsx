@@ -12,6 +12,7 @@ import { ShoppingBag, Minus, Plus, Trash2 } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/constants/context/AuthContext";
 import axios from "axios";
+import { useTheme } from "@/hooks/useTheme";
 
 export default function Bag() {
   const router = useRouter();
@@ -19,7 +20,17 @@ export default function Bag() {
   const { user } = useAuth();
   const [bag, setbag] = useState<any[]>([]);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
-
+  const { activeTheme } = useTheme();
+    const colors =
+      activeTheme === "dark"
+        ? {
+          background: "#121212",
+          text: "#FFFFFF",
+        }
+        : {
+          background: "#FFFFFF",
+          text: "#111111",
+        };
   useEffect(() => {
     // Simulate loading time
     if (user) {
@@ -168,12 +179,14 @@ export default function Bag() {
 
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Shopping Bag</Text>
+        <Text style={[styles.headerTitle, { color: colors.text }]}>
+          Shopping Bag
+        </Text>
       </View>
 
-      <ScrollView style={styles.content}>
+      <ScrollView style={[styles.content, { backgroundColor: colors.background }]}>
         {activeItems.map((item: any) => (
           <View key={item._id} style={styles.bagItem}>
             <Image
@@ -181,12 +194,20 @@ export default function Bag() {
               style={styles.itemImage}
             />
             <View style={styles.itemInfo}>
-              <Text style={styles.brandName}>{item.productId.brand}</Text>
-              <Text style={styles.itemName}>{item.productId.name}</Text>
-              <Text style={styles.itemSize}>Size: {item.size}</Text>
-              <Text style={styles.itemPrice}>₹{item.productId.price}</Text>
+              <Text style={[styles.brandName, { color: colors.text }]}>
+                {item.productId.brand}
+              </Text>
+              <Text style={[styles.itemName, { color: colors.text }]}>
+                {item.productId.name}
+              </Text>
+              <Text style={[styles.itemSize, { color: colors.text }]}>
+                Size: {item.size}
+              </Text>
+              <Text style={[styles.itemPrice, { color: colors.text }]}>
+                ₹{item.productId.price}
+              </Text>
 
-              <View style={styles.quantityContainer}>
+              <View style={[styles.quantityContainer, { backgroundColor: colors.background }]}>
                 <TouchableOpacity
                   disabled={item.quantity === 1 || updatingId === item._id}
                   style={[

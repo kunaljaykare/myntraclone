@@ -39,7 +39,17 @@ export default function Home() {
   const { user } = useAuth();
   const themeContext = useTheme();
   if (!themeContext) return null;
-  const { theme } = themeContext;
+  const { activeTheme } = useTheme();
+  const colors =
+    activeTheme === "dark"
+      ? {
+        background: "#121212",
+        text: "#FFFFFF",
+      }
+      : {
+        background: "#FFFFFF",
+        text: "#111111",
+      };
   const handleProductPress = (productId: number) => {
     if (!user) {
       router.push("/login");
@@ -69,8 +79,23 @@ export default function Home() {
     fetchproduct();
   }, []);
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
+
+    <ScrollView
+      style={[
+        styles.container,
+        {
+          backgroundColor: colors.background,
+        },
+      ]}
+    >
+      <View
+        style={[
+          styles.header,
+          {
+            backgroundColor: colors.background,
+          },
+        ]}
+      >
         <Text style={styles.logo}>MYNTRA</Text>
         <TouchableOpacity
           style={styles.searchButton}
@@ -89,7 +114,14 @@ export default function Home() {
 
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>SHOP BY CATEGORY</Text>
+          <Text
+            style={[
+              styles.sectionTitle,
+              {
+                color: colors.text,
+              },
+            ]}
+          >SHOP BY CATEGORY</Text>
           <TouchableOpacity style={styles.viewAll}>
             <Text style={styles.viewAllText}>View All</Text>
             <ChevronRight size={20} color="#ff3f6c" />
@@ -107,7 +139,9 @@ export default function Home() {
               style={styles.loader}
             />
           ) : !categories || categories.length === 0 ? (
-            <Text style={styles.emptyText}>No categories available</Text>
+            <Text style={[styles.emptyText, { color: colors.text }]}>
+              No categories available
+            </Text>
           ) : (
             categories.map((category: any) => (
               <TouchableOpacity
@@ -123,7 +157,9 @@ export default function Home() {
                   source={{ uri: category.image }}
                   style={styles.categoryImage}
                 />
-                <Text style={styles.categoryName}>{category.name}</Text>
+                <Text style={[styles.categoryName, { color: colors.text }]}>
+                  {category.name}
+                </Text>
               </TouchableOpacity>
             ))
           )}
@@ -132,7 +168,16 @@ export default function Home() {
 
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>DEALS OF THE DAY</Text>
+          <Text
+            style={[
+              styles.sectionTitle,
+              {
+                color: colors.text,
+              },
+            ]}
+          >
+            DEALS OF THE DAY
+          </Text>
         </View>
         <ScrollView
           horizontal
@@ -143,7 +188,9 @@ export default function Home() {
             <TouchableOpacity key={deal.id} style={styles.dealCard}>
               <Image source={{ uri: deal.image }} style={styles.dealImage} />
               <View style={styles.dealOverlay}>
-                <Text style={styles.dealTitle}>{deal.title}</Text>
+                <Text style={[styles.dealTitle, { color: colors.text }]}>
+                  {deal.title}
+                </Text>
               </View>
             </TouchableOpacity>
           ))}
@@ -156,18 +203,37 @@ export default function Home() {
 
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>TRENDING NOW</Text>
+          <Text
+            style={[
+              styles.sectionTitle,
+              {
+                color: colors.text,
+              },
+            ]}
+          >
+            TRENDING NOW
+          </Text>
         </View>
         {loadingProducts ? (
           <ActivityIndicator size="large" color="#ff3f6c" />
         ) : !product || product.length === 0 ? (
-          <Text style={styles.emptyText}>No Product available</Text>
+          <Text style={[styles.emptyText, { color: colors.text }]}>
+            No Product available
+          </Text>
         ) : (
           <View style={styles.productsGrid}>
             {product.map((item: any) => (
               <TouchableOpacity
                 key={item._id}
-                style={styles.productCard}
+                style={[
+                  styles.productCard,
+                  {
+                    backgroundColor:
+                      activeTheme === "dark"
+                        ? "#1E1E1E"
+                        : "#fff",
+                  },
+                ]}
                 onPress={() => handleProductPress(item._id)}
               >
                 <Image
@@ -177,12 +243,20 @@ export default function Home() {
                   style={styles.productImage}
                 />
                 <View style={styles.productInfo}>
-                  <Text style={styles.brandName}>{item.brand}</Text>
-                  <Text style={styles.productName}>{item.name}</Text>
+                  <Text style={[styles.brandName, { color: colors.text }]}>
+                    {item.brand}
+                  </Text>
+                  <Text style={[styles.productName, { color: colors.text }]}>
+                    {item.name}
+                  </Text>
                   <View style={styles.priceRow}>
-                    <Text style={styles.productPrice}>₹{item.price}</Text>
+                    <Text style={[styles.productPrice, { color: colors.text }]}>
+                      ₹{item.price}
+                    </Text>
                     {item.discount && (
-                      <Text style={styles.discount}>{item.discount}</Text>
+                      <Text style={[styles.discount, { color: colors.text }]}>
+                        {item.discount}
+                      </Text>
                     )}
                   </View>
                 </View>
@@ -198,7 +272,6 @@ export default function Home() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
   },
   header: {
     flexDirection: "row",
