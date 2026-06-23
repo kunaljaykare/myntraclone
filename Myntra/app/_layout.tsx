@@ -15,7 +15,8 @@ import React from "react";
 import { ThemeProvider } from "@/theme/ThemeContext";
 import { AuthProvider, useAuth } from "@/constants/context/AuthContext";
 import { registerForPushNotificationsAsync } from "@/utils/registerForPushNotifications";
-import { useColorScheme } from "@/hooks/useColorScheme";
+import { useContext } from "react";
+import { ThemeContext } from "@/theme/ThemeContext";
 import { Platform } from "react-native";
 // Prevent splash screen auto hide
 SplashScreen.preventAutoHideAsync();
@@ -102,6 +103,11 @@ Main Navigation Layout
 AuthProvider is now mounted so useAuth() works correctly
 */
 function RootLayoutNav() {
+  const themeContext = useContext(ThemeContext);
+
+  if (!themeContext) return null;
+
+  const { activeTheme } = themeContext;
   const router = useRouter();
 
   const { isAuthenticated, authLoading, authToken } = useAuth();
@@ -185,7 +191,13 @@ function RootLayoutNav() {
   if (authLoading) return null;
 
   return (
-    <>
+    <NavigationThemeProvider
+      value={
+        activeTheme === "dark"
+          ? NavigationDarkTheme
+          : NavigationLightTheme
+      }
+    >
       <Stack screenOptions={{ headerShown: false }}>
         {isAuthenticated ? (
           <Stack.Screen name="(tabs)" />
@@ -195,7 +207,7 @@ function RootLayoutNav() {
       </Stack>
 
       <StatusBar style="auto" />
-    </>
+    </NavigationThemeProvider>
   );
 }
 /*
