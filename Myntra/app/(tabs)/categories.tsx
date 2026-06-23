@@ -13,6 +13,7 @@ import axios from "axios";
 import { useRouter } from "expo-router";
 import { Search, X } from "lucide-react-native";
 import React, { useEffect, useState } from "react";
+import { useTheme } from "@/hooks/useTheme";
 
 
 export default function TabTwoScreen() {
@@ -23,6 +24,17 @@ export default function TabTwoScreen() {
   const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [categories, setcategories] = useState<any>([]);
+  const { activeTheme } = useTheme();
+  const colors =
+    activeTheme === "dark"
+      ? {
+        background: "#121212",
+        text: "#FFFFFF",
+      }
+      : {
+        background: "#FFFFFF",
+        text: "#111111",
+      };
   useEffect(() => {
     const fetchproduct = async () => {
       try {
@@ -44,15 +56,15 @@ export default function TabTwoScreen() {
   }, [categoryId, categories]);
   if (isLoading) {
     return (
-      <View style={styles.loaderContainer}>
+      <View style={[styles.loaderContainer, { backgroundColor: colors.background }]}>
         <ActivityIndicator size="large" color="#ff3f6c" />
       </View>
     );
   }
   if (categories.length === 0 && !isLoading) {
     return (
-      <View style={styles.container}>
-        <Text style={{ textAlign: "center", marginTop: 40 }}>
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
+        <Text style={[{ textAlign: "center", marginTop: 40 }, { color: colors.text }]}>
           Categories not found
         </Text>
       </View>
@@ -109,15 +121,15 @@ export default function TabTwoScreen() {
       >
         <Image
           source={{ uri: product.images?.[0] || "https://via.placeholder.com/300" }}
-          style={styles.productImage}
+          style={[styles.productImage, { backgroundColor: colors.background }]}
         />
-        <View style={styles.productInfo}>
-          <Text style={styles.brandName}>{product.brand}</Text>
-          <Text style={styles.productName}>{product.name}</Text>
-          <View style={styles.priceRow}>
-            <Text style={styles.price}>₹{product.price}</Text>
+        <View style={[styles.productInfo, { backgroundColor: colors.background }]}>
+          <Text style={[styles.brandName, { color: colors.text }]}>{product.brand}</Text>
+          <Text style={[styles.productName, { color: colors.text }]}>{product.name}</Text>
+          <View style={[styles.priceRow, { backgroundColor: colors.background }]}>
+            <Text style={[styles.price, { color: colors.text }]}>₹{product.price}</Text>
             {product.discount && (
-              <Text style={styles.discount}>{product.discount}</Text>
+              <Text style={[styles.discount, { color: colors.text }]}>{product.discount}</Text>
             )}
           </View>
         </View>
@@ -125,16 +137,16 @@ export default function TabTwoScreen() {
     ));
   };
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Categories</Text>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <View style={[styles.header, { backgroundColor: colors.background }]}>
+        <Text style={[styles.headerTitle, { color: colors.text }]}>Categories</Text>
       </View>
 
-      <View style={styles.searchContainer}>
-        <View style={styles.searchInputContainer}>
+      <View style={[styles.searchContainer, { backgroundColor: colors.background }]}>
+        <View style={[styles.searchInputContainer, { backgroundColor: colors.background }]}>
           <Search size={20} color="#666" style={styles.searchIcon} />
           <TextInput
-            style={styles.searchInput}
+            style={[styles.searchInput, { color: colors.text }]}
             placeholder="Search for products, brands and more"
             value={searchQuery}
             onChangeText={handleSearch}
@@ -146,30 +158,30 @@ export default function TabTwoScreen() {
           )}
         </View>
       </View>
-      <ScrollView style={styles.content}>
+      <ScrollView style={[styles.content, { backgroundColor: colors.background }]}>
         {!selectedCategory && (
-          <View style={styles.categoriesGrid}>
+          <View style={[styles.categoriesGrid, { backgroundColor: colors.background }]}>
             {filtercategories?.map((category: any) => (
               <TouchableOpacity
                 key={category._id}
-                style={styles.categoryCard}
+                style={[styles.categoryCard, { backgroundColor: colors.background }]}
                 onPress={() => handleCategorySelect(category._id)}
               >
                 <Image
                   source={{ uri: category.image }}
                   style={styles.categoryImage}
                 />
-                <View style={styles.categoryInfo}>
-                  <Text style={styles.categoryName}>{category.name}</Text>
+                <View style={[styles.categoryInfo, { backgroundColor: colors.background }]}>
+                  <Text style={[styles.categoryName, { color: colors.text }]}>{category.name}</Text>
                   <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                    <View style={styles.subcategories}>
+                    <View style={[styles.subcategories, { backgroundColor: colors.background }]}>
                       {category?.subcategory?.map((sub: any, index: any) => (
                         <TouchableOpacity
                           key={index}
-                          style={styles.subcategoryTag}
+                          style={[styles.subcategoryTag, { backgroundColor: colors.background }]}
                           onPress={() => handleSubcategoryFromCategory(category._id, sub)}
                         >
-                          <Text style={styles.subcategoryText}>{sub}</Text>
+                          <Text style={[styles.subcategoryText, { color: colors.text }]}>{sub}</Text>
                         </TouchableOpacity>
                       ))}
                     </View>
@@ -178,7 +190,7 @@ export default function TabTwoScreen() {
               </TouchableOpacity>
             ))}
             {filtercategories.length === 0 && (
-              <Text style={{ textAlign: "center", marginTop: 40 }}>
+              <Text style={[{ textAlign: "center", marginTop: 40 }, { color: colors.text }]}>
                 No results found
               </Text>
             )}
@@ -186,18 +198,18 @@ export default function TabTwoScreen() {
         )}
 
         {selectedcategorydata && (
-          <View style={styles.categoryDetail}>
-            <View style={styles.categoryHeader}>
+          <View style={[styles.categoryDetail, { backgroundColor: colors.background }]}>
+            <View style={[styles.categoryHeader, { backgroundColor: colors.background }]}>
               <TouchableOpacity
-                style={styles.backButton}
+                style={[styles.backButton, { backgroundColor: colors.background }]}
                 onPress={() => {
                   setSelectedCategory(null);
                   setSelectedSubcategory(null);
                 }}
               >
-                <Text style={styles.backButtonText}>← Back to Categories</Text>
+                <Text style={[styles.backButtonText, { color: colors.text }]}>← Back to Categories</Text>
               </TouchableOpacity>
-              <Text style={styles.categoryTitle}>
+              <Text style={[styles.categoryTitle, { color: colors.text }]}>
                 {selectedcategorydata.name}
               </Text>
             </View>
@@ -205,7 +217,7 @@ export default function TabTwoScreen() {
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
-              style={styles.subcategoriesScroll}
+              style={[styles.subcategoriesScroll, { backgroundColor: colors.background }]}
             >
               {selectedcategorydata.subcategory.map(
                 (sub: any, index: any) => (
@@ -234,10 +246,10 @@ export default function TabTwoScreen() {
                 )
               )}
             </ScrollView>
-            <View style={styles.productsGrid}>
+            <View style={[styles.productsGrid, { backgroundColor: colors.background }]}>
               {renderProducts(selectedcategorydata?.productId)}
               {selectedcategorydata?.productId?.length === 0 && (
-                <Text style={{ textAlign: "center", marginTop: 40 }}>
+                <Text style={[{ textAlign: "center", marginTop: 40 }, { color: colors.text }, {backgroundColor: colors.background}]}>
                   No products available
                 </Text>
               )}

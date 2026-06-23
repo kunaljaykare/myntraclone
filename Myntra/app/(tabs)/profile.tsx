@@ -18,6 +18,7 @@ import {
 } from "lucide-react-native";
 import React from "react";
 import { useAuth } from "@/constants/context/AuthContext";
+import { useTheme } from "@/hooks/useTheme";
 
 const menuItems = [
   { icon: Package, label: "Orders", route: "/orders" },
@@ -30,13 +31,24 @@ const menuItems = [
 export default function Profile() {
   const router = useRouter();
   const { user, logout, isAuthenticated, authLoading } = useAuth();
+  const { activeTheme } = useTheme();
+  const colors =
+    activeTheme === "dark"
+      ? {
+        background: "#121212",
+        text: "#FFFFFF",
+      }
+      : {
+        background: "#FFFFFF",
+        text: "#111111",
+      };
   const handleLogout = async () => {
     await logout();
     router.replace("/login");
   };
   if (authLoading) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
         <Text>Loading...</Text>
       </View>
     );
@@ -47,16 +59,16 @@ export default function Profile() {
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Profile</Text>
         </View>
-        <View style={styles.emptyState}>
+        <View style={[styles.emptyState, { backgroundColor: colors.background }]}>
           <User size={64} color="#ff3f6c" />
-          <Text style={styles.emptyTitle}>
+          <Text style={[styles.emptyTitle, { color: colors.text }]}>
             Please login to view your profile
           </Text>
           <TouchableOpacity
-            style={styles.loginButton}
+            style={[styles.loginButton, { backgroundColor: colors.background }]}
             onPress={() => router.push("/login")}
           >
-            <Text style={styles.loginButtonText}>LOGIN</Text>
+            <Text style={[styles.loginButtonText, { color: colors.text }]}>LOGIN</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -64,41 +76,41 @@ export default function Profile() {
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Profile</Text>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <View style={[styles.header, { backgroundColor: colors.background }]}>
+        <Text style={[styles.headerTitle, { color: colors.text }]}>Profile</Text>
       </View>
 
-      <ScrollView style={styles.content}>
-        <View style={styles.userInfo}>
+      <ScrollView style={[styles.content, { backgroundColor: colors.background }]}>
+        <View style={[styles.userInfo, { backgroundColor: colors.background }]}>
           <View style={styles.avatar}>
             <User size={40} color="#fff" />
           </View>
-          <View style={styles.userDetails}>
-            <Text style={styles.userName}>{user.name}</Text>
-            <Text style={styles.userEmail}>{user.email}</Text>
+          <View style={[styles.userDetails, { backgroundColor: colors.background }]}>
+            <Text style={[styles.userName, { color: colors.text }]}>{user.name}</Text>
+            <Text style={[styles.userEmail, { color: colors.text }]}>{user.email}</Text>
           </View>
         </View>
 
-        <View style={styles.menuSection}>
+        <View style={[styles.menuSection, { backgroundColor: colors.background }]}>
           {menuItems.map((item, index) => (
             <TouchableOpacity
               key={index}
-              style={styles.menuItem}
+              style={[styles.menuItem, { backgroundColor: colors.background }]}
               onPress={() => router.push(item.route as any)}
             >
-              <View style={styles.menuItemLeft}>
+              <View style={[styles.menuItemLeft, { backgroundColor: colors.background }]}>
                 <item.icon size={24} color="#3e3e3e" />
-                <Text style={styles.menuItemLabel}>{item.label}</Text>
+                <Text style={[styles.menuItemLabel, { color: colors.text }]}>{item.label}</Text>
               </View>
               <ChevronRight size={24} color="#3e3e3e" />
             </TouchableOpacity>
           ))}
         </View>
 
-        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+        <TouchableOpacity style={[styles.logoutButton, { backgroundColor: colors.background }]} onPress={handleLogout}>
           <LogOut size={24} color="#ff3f6c" />
-          <Text style={styles.logoutText}>Logout</Text>
+          <Text style={[styles.logoutText, { color: colors.text }]}>Logout</Text>
         </TouchableOpacity>
       </ScrollView>
     </View>

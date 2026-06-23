@@ -180,7 +180,7 @@ export default function Bag() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: colors.background }]}>
         <Text style={[styles.headerTitle, { color: colors.text }]}>
           Shopping Bag
         </Text>
@@ -188,7 +188,7 @@ export default function Bag() {
 
       <ScrollView style={[styles.content, { backgroundColor: colors.background }]}>
         {activeItems.map((item: any) => (
-          <View key={item._id} style={styles.bagItem}>
+          <View key={item._id} style={[styles.bagItem, { backgroundColor: colors.background }]}>
             <Image
               source={{ uri: item.productId.images[0] }}
               style={styles.itemImage}
@@ -212,7 +212,7 @@ export default function Bag() {
                   disabled={item.quantity === 1 || updatingId === item._id}
                   style={[
                     styles.quantityButton,
-                    item.quantity === 1 && { opacity: 0.5 }
+                    item.quantity === 1 && { opacity: 0.5 }, { backgroundColor: colors.background }
                   ]}
                   onPress={() => updateQuantity(item._id, item.quantity - 1)}
                 >
@@ -220,7 +220,9 @@ export default function Bag() {
                   <Minus size={20} color="#3e3e3e" />
                 </TouchableOpacity>
 
-                <Text style={styles.quantity}>{item.quantity}</Text>
+                <Text style={[styles.quantity, { color: colors.text }]}>
+                  {item.quantity}
+                </Text>
 
                 <TouchableOpacity
                   disabled={updatingId === item._id}
@@ -237,9 +239,10 @@ export default function Bag() {
                 onPress={() => saveForLater(item._id)}
               >
                 <Text
-                  style={{
-                    color: updatingId === item._id ? "#ccc" : "#ff3f6c",
-                  }}
+                  style={[
+                    { color: updatingId === item._id ? "#ccc" : "#ff3f6c" },
+                    { color: colors.text }
+                  ]}
                 >
                   {updatingId === item._id ? "Please wait..." : "Save for later"}
                 </Text>
@@ -257,7 +260,7 @@ export default function Bag() {
           </View>
         ))}
         {activeItems.length === 0 && savedItems.length > 0 && (
-          <Text style={{ textAlign: "center", marginVertical: 20 }}>
+          <Text style={[{ textAlign: "center", marginVertical: 20 }, { color: colors.text }]}>
             Your bag is empty. Move items from Saved for Later.
           </Text>
         )}
@@ -265,27 +268,31 @@ export default function Bag() {
 
         {savedItems.length > 0 && (
           <View style={{ marginTop: 30 }}>
-            <Text style={{ fontSize: 18, fontWeight: "bold" }}>
+            <Text style={[{ fontSize: 18, fontWeight: "bold" }, { color: colors.text }]}>
               Saved for Later
             </Text>
             {savedItems.map((item: any) => (
-              <View key={item._id} style={styles.bagItem}>
+              <View key={item._id} style={[styles.bagItem, { backgroundColor: colors.background }]}>
                 <Image
                   source={{ uri: item.productId.images[0] }}
                   style={styles.itemImage}
                 />
 
                 <View style={styles.itemInfo}>
-                  <Text style={styles.brandName}>{item.productId.brand}</Text>
-                  <Text style={styles.itemName}>{item.productId.name}</Text>
-                  <Text style={styles.itemPrice}>
+                  <Text style={[styles.brandName, { color: colors.text }]}>
+                    {item.productId.brand}
+                  </Text>
+                  <Text style={[styles.itemName, { color: colors.text }]}>
+                    {item.productId.name}
+                  </Text>
+                  <Text style={[styles.itemPrice, { color: colors.text }]}>
                     ₹{item.productId.price}
                   </Text>
                   <TouchableOpacity
                     disabled={updatingId === item._id}
                     onPress={() => moveToBag(item._id)}
                   >
-                    <Text style={{ color: updatingId === item._id ? "#ccc" : "#ff3f6c" }}>
+                    <Text style={[{ color: updatingId === item._id ? "#ccc" : "#ff3f6c" }, { color: colors.text }]}>
                       {updatingId === item._id ? "Please wait..." : "Move to Bag"}
                     </Text>
 
@@ -300,10 +307,10 @@ export default function Bag() {
 
       </ScrollView>
 
-      <View style={styles.footer}>
+      <View style={[styles.footer, { backgroundColor: colors.background }]}>
         <View style={styles.totalContainer}>
-          <Text style={styles.totalLabel}>Total Amount</Text>
-          <Text style={styles.totalAmount}>₹{total}</Text>
+          <Text style={[styles.totalLabel, { color: colors.text }]}>Total Amount</Text>
+          <Text style={[styles.totalAmount, { color: colors.text }]}>₹{total}</Text>
         </View>
         <TouchableOpacity
           disabled={activeItems.length === 0}
@@ -313,7 +320,7 @@ export default function Bag() {
           ]}
           onPress={() => router.push("/checkout")}
         >
-          <Text style={styles.checkoutButtonText}>PLACE ORDER</Text>
+          <Text style={[styles.checkoutButtonText, { color: colors.text }]}>PLACE ORDER</Text>
         </TouchableOpacity>
 
       </View>
