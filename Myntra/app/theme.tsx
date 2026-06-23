@@ -37,6 +37,7 @@ export default function ThemeSettingsScreen() {
     return (
         <View
             style={[
+                { flex: 1 },
                 styles.container,
                 { backgroundColor: colors.background },
             ]}
